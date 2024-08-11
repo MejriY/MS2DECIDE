@@ -1,0 +1,7 @@
+gnps_results_mia.zip
+*.pyc
+__pycache__/
+v_0/__pycache__/
+gnps_results_mia/
+src/preparation/gnps_results_mia/
+Auth_file.txt
