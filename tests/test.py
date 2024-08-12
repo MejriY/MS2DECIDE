@@ -103,19 +103,47 @@ class TestMultipleSourceAnnotation(unittest.TestCase):
         g = data.eta_g(data.similarities['GNPS'])
         s = data.eta_s(data.similarities['SIRIUS'])
         i = data.eta_i(data.similarities['ISDB'])
+        real_value_of_eta=0 # by modelisation
+        real_value_eta_g_0=-4
+        real_value_eta_g_8=24  #0.8
+        real_value_eta_g_1=50
+        
+        real_value_eta_s_0=-1
+        real_value_eta_s_8=6   #0.8
+        real_value_eta_s_1=12.5
+        
+        real_value_eta_i_0=-0.5
+        real_value_eta_i_8=3   #0.8
+        real_value_eta_i_1=6.25
+        
+        real_value_psi_g = (real_value_of_eta-real_value_eta_g_0)/(real_value_eta_g_1-real_value_eta_g_0)
+        real_value_psi_s = (real_value_of_eta-real_value_eta_s_0)/(real_value_eta_s_1-real_value_eta_s_0)
+        real_value_psi_i = (real_value_of_eta-real_value_eta_i_0)/(real_value_eta_i_1-real_value_eta_i_0)
+        
+        real_value_psi_g_8 = (real_value_eta_g_8 - real_value_eta_g_0)/(real_value_eta_g_1 - real_value_eta_g_0)  #0.8
+        real_value_psi_s_8 = (real_value_eta_s_8 - real_value_eta_s_0)/(real_value_eta_s_1 - real_value_eta_s_0)  #0.8
+        real_value_psi_i_8 = (real_value_eta_i_8 - real_value_eta_i_0)/(real_value_eta_i_1 - real_value_eta_i_0)  #0.8
+        
         gs=data.phi_gs(data.tanimotos.tgs,data.similarities['GNPS'],data.similarities['SIRIUS'])
+        real_value_of_gs=( (0.7-0.5) / 0.2 )  *  ( (real_value_psi_g+real_value_psi_s) / (real_value_psi_g_8+real_value_psi_s_8) )  *  10
+        
         gi=data.phi_gi(data.tanimotos.tgi,data.similarities['GNPS'],data.similarities['ISDB'])
+        real_value_of_gi=( (0.7-0.5) / 0.2 )  *  ( (real_value_psi_g+real_value_psi_i) / (real_value_psi_g_8+real_value_psi_i_8) )  *  6
+        
         si=data.phi_si(data.tanimotos.tsi,data.similarities['SIRIUS'],data.similarities['ISDB'])
+        real_value_of_si=( (0.7-0.5) / 0.2 )  *  ( (real_value_psi_s+real_value_psi_i) / (real_value_psi_s_8+real_value_psi_i_8) )  *  15
         
         k = data.k()
-
-        self.assertEqual(g, 0)
-        self.assertEqual(s, 0)
-        self.assertEqual(i, 0)
-        self.assertEqual(gs, 1.4285714285714282)
-        self.assertEqual(gi, 0.857142857142857)
-        self.assertEqual(si, 2.1428571428571423)
-        self.assertEqual(k, 4.428571428571427)
+        real_value_of_k=real_value_of_eta+real_value_of_eta+real_value_of_eta+real_value_of_gs+real_value_of_gi+real_value_of_si
+        
+        
+        self.assertEqual(g, real_value_of_eta)
+        self.assertEqual(s, real_value_of_eta)
+        self.assertEqual(i, real_value_of_eta)
+        self.assertEqual(gs, real_value_of_gs)
+        self.assertEqual(gi, real_value_of_gi)
+        self.assertEqual(si, real_value_of_si)
+        self.assertEqual(k, real_value_of_k)
         
         self.assertEqual(k, g+s+i+gs+gi+si)
 if __name__ == '__main__':
