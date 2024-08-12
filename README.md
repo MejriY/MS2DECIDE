@@ -1,4 +1,5 @@
-# MS2Decide
+= MS2DECIDE
+
 ![alt text](https://github.com/MejriY/Decide_test/blob/master/image/ms2decide_logo.png?raw=true)
 
 Mass spectrometry-based natural products targeted discovery oftenrelies on a complicated decision-making process involving tediouscomparison of exact masses data and tandemmassspectra-based annotation tools outputs against various spectral reference libraries.
