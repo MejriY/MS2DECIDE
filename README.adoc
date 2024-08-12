@@ -35,7 +35,7 @@ image::https://img.shields.io/pypi/v/ms2decide.svg[PyPI - Version,link=https://p
 image::https://img.shields.io/pypi/pyversions/ms2decide.svg[PyPI - Python Version,link=https://pypi.org/project/ms2decide]
 
 == Installation
-
+ 
 ```console
-pip install ms2decide
+pip install '/path/to/folder/ms2decide'
 ```
