@@ -2,8 +2,8 @@
 
 image::https://github.com/MejriY/Decide_test/raw/master/image/ms2decide_logo.png[]
 
-Mass spectrometry-based natural products targeted discovery oftenrelies on a complicated decision-making process involving tediouscomparison of exact masses data and tandemmassspectra-based annotation tools outputs against various spectral reference libraries.
-Toaddress this bottleneck we present tandem mass spectrum to decision(MS2DECIDE) which leverages Decision Theory and expert knowledgeto aggregate the annotation outputs of GNPS, Sirius, and ISDB-Lotusand computes a recommendation for targeting natural products inregard to their potential novelty. We demonstrate, through two cases tudies, that MS2DECIDE reliably captures the novelty of naturalproducts from their tandem mass spectra.
+Mass spectrometry-based natural products targeted discovery often relies on a complicated decision-making process involving tedious comparison of exact masses data and tandem mass spectra-based annotation tools outputs against various spectral reference libraries.
+To address this bottleneck we present tandem mass spectrum to decision(MS2DECIDE) which leverages Decision Theory and expert knowledge to aggregate the annotation outputs of GNPS, Sirius, and ISDB-LOTUS and computes a recommendation for targeting natural products inregard to their potential novelty. We demonstrate, through two cases tudies, that MS2DECIDE reliably captures the novelty of naturalproducts from their tandem mass spectra.
 
 image::https://github.com/MejriY/Decide_test/raw/master/image/all_article_workflow.png[]
 
@@ -16,7 +16,7 @@ image::https://github.com/MejriY/Decide_test/raw/master/image/gnps_iterative.png
 Sirius annotations were performed in batch mode by using Sirius 6. we utilized the \textit{ConfidenceScoreExact} measure.
 Unfortunately, in some cases, Sirius was not able to propose an annotation. To remedy, we associated a value of 0.5 to Sirius matching score. Additionally, in scenarios where there is no match with GNPS or no match with Sirius, the tanimoto between GNPS and SIRIUS cannot be calculated. Hence, a default value of 0.25 was also assigned to $T_{gs}$ in these instances. 
 
-=== ISDB-Lotus
+=== ISDB-LOTUS
 For ISDB-Lotus, since a strict library search was applied, we considered a zero answer as an important information regarding our definition of novelty. Hence, no mean value was associated.
 
 == Validation
