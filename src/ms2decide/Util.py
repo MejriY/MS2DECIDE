@@ -62,8 +62,8 @@ def _check_file_and_download(tool):
     """
     isdb_path = input(
         'SELECT DIRECTORY OF ISDB DATA \n IF MGF FILE NOT THERE, FILE WILL BE DONWLOADED : \n')
-    if (isdb_path[-2:] != "\\"):
-        isdb_path += '\\'
+    # if (isdb_path[-2:] != "\\"):
+    #     isdb_path += '\\'
 
     if (tool+'.mgf' in os.listdir(isdb_path)):
         print('==========> FILE ALREADY IN DIRECTORY')
