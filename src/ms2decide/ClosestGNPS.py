@@ -142,42 +142,8 @@ def _get_networking_parameters():
     invokeParameters["RUN_DEREPLICATOR"] = "0"
     return invokeParameters
 
-def get_iterative_discounts_unrounded():
-    N1 = 1
-    N2 = N1-0.025*12
-    N3 = N2-0.025*10
-
-    alpha = {6: {0.02: N1,
-                 0.1: N1-0.025*1,
-                 10: N1-0.025*2,
-                 25: N1-0.025*4,
-                 50: N1-0.025*6,
-                 100: N1-0.025*8,
-                 250: N1-0.025*10,
-                 500: N1-0.025*12,
-             0: N1-0.025*14},
-             5: {0.02: N2,
-                 0.1: N2-0.025*1,
-                 10: N2-0.025*2,
-                 25: N2-0.025*4,
-                 50: N2-0.025*6,
-                 100: N2-0.025*8,
-                 250: N2-0.025*10,
-                 500: N2-0.025*12,
-             0: N2-0.025*14},
-             4: {0.02: N3,
-                 0.1: N3-0.025*1,
-                 10: N3-0.025*2,
-                 25: N3-0.025*4,
-                 50: N3-0.025*6,
-                 100: N3-0.025*8,
-                 250: N3-0.025*10,
-                 500: N3-0.025*12,
-             0: N3-0.025*14}}
-    return alpha
 
 def _get_iterative_parameters():
-    # TODO use the unrounded one.
     N1 = 1
     N2 = round(N1-0.025*12, 3)
     N3 = round(N2-0.025*10, 3)
