@@ -62,8 +62,8 @@ def _check_file_and_download(tool):
     """
     isdb_path = input(
         'SELECT DIRECTORY OF ISDB DATA \n IF MGF FILE NOT THERE, FILE WILL BE DONWLOADED : \n')
-    # if (isdb_path[-2:] != "\\"):
-    #     isdb_path += '\\'
+    if (isdb_path[-2:] != "\\"):
+        isdb_path += '\\'
 
     if (tool+'.mgf' in os.listdir(isdb_path)):
         print('==========> FILE ALREADY IN DIRECTORY')
@@ -441,7 +441,7 @@ def _get_match(sp, query, tolerance, mz_power, intensity_power, shift):
         try:
             SCORES = calculate_scores(query, [sp], score)
             rsp, res = SCORES.scores_by_query(
-                sp, 'ModifiedCosine_score')[0]
+                sp, 'ModifiedCosine_score', sort=True)[0]
         except:
             rsp, res = '#', 0
             for i in query:

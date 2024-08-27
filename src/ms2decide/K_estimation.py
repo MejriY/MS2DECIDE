@@ -5,24 +5,30 @@ from .IsdbAnnotation import get_cfm_annotation
 from .SiriusAnnotation import SiriusAnnotation
 from .MultipleSourceAnnotation import MultipleSourceAnnotation, MultipleSourceAnnotation_to_dataframe
 
+
 def K_estimation():
-    
+
     auth_path = input('SELECT THE PATH FOR YOUR AUTH.TXT FILE \n :')
-    auth=AuthMail.from_txt(auth_path)
-    
+    auth = AuthMail.from_txt(auth_path)
+
     quan_path = input('SELECT THE PATH FOR YOUR QUANTITAIVE DATA \n :')
     mgf_path = input('SELECT THE PATH OF YOU MGF DATA \n :')
-    mgf=MgfInstance(mgf_path)
-    sirius_path = input('SELECT THE PATH FOR THE RESULT OF SIRIUS JOB (THE structure_identifications.tsv) \n :')
-    
-    gnps_res = closest_gnps_iterative(auth, mgf_path, quan_path) 
+    mgf = MgfInstance(mgf_path)
+    sirius_path = input(
+        'SELECT THE PATH FOR THE RESULT OF SIRIUS JOB (THE structure_identifications.tsv) \n :')
+
+    gnps_res = closest_gnps_iterative(auth, mgf_path, quan_path)
     isdb_res = get_cfm_annotation(mgf)
     sirius_res = SiriusAnnotation(sirius_path)
-    
-    get_gnps, get_sirius, get_isdb= True, True, True
-    results=MultipleSourceAnnotation(mgf, get_gnps, get_sirius, get_isdb, gnps_res, sirius_res, isdb_res, 'K')
-    dfw=MultipleSourceAnnotation_to_dataframe(mgf, get_gnps, get_sirius, get_isdb, gnps_res, sirius_res, isdb_res,results)
-    taken=[i for i in mgf.data if mgf.data[i].metadata['precursor_mz']>200 and mgf.data[i].metadata['precursor_mz']<850]
-    taken=[i for i in taken if len(mgf.data[i].peaks.mz)>3]
-    dfw_taken=dfw[dfw.ID.isin(taken)]
-    return(dfw_taken)
+
+    get_gnps, get_sirius, get_isdb = True, True, True
+    results = {}
+    results['K'] = MultipleSourceAnnotation(
+        mgf, get_gnps, get_sirius, get_isdb, gnps_res, sirius_res.data, isdb_res, 'K')
+    dfw = MultipleSourceAnnotation_to_dataframe(
+        mgf, get_gnps, get_sirius, get_isdb, gnps_res, sirius_res.data, isdb_res, results)
+    taken = [i for i in mgf.data if mgf.data[i].metadata['precursor_mz']
+             > 200 and mgf.data[i].metadata['precursor_mz'] < 850]
+    taken = [i for i in taken if len(mgf.data[i].peaks.mz) > 3]
+    dfw_taken = dfw[dfw.ID.isin(taken)]
+    return (dfw_taken)
