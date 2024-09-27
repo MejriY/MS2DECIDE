@@ -5,7 +5,7 @@ image::https://github.com/MejriY/Decide_test/raw/master/image/ms2decide_logo.png
 image::https://github.com/MejriY/Decide_test/raw/master/image/all_article_workflow.png[]
 
 == How we use tools
-image::https://github.com/MejriY/MS2DECIDE/raw/master/image/who%20it%20work.png[]
+image::https://github.com/MejriY/Decide_test/raw/master/image/how_it_works.png[]
 === Weighted iterative GNPS analog search (WIGAS)
 image::https://github.com/MejriY/Decide_test/raw/master/image/gnps_iterative.png[]
 
