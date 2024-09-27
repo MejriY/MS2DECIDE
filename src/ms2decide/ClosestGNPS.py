@@ -144,6 +144,12 @@ def _get_networking_parameters():
 
 
 def _get_iterative_parameters():
+    """
+    Return iterative parameters for peak matching in GNPS.
+
+    Returns:
+        dict: Iterative parameters for peak matching.
+    """
     N1 = 1
     N2 = round(N1-0.025*12, 3)
     N3 = round(N2-0.025*10, 3)
@@ -205,6 +211,18 @@ def _launch_GNPS_workflow(auth, path_file_mgf_in_gnps, path_file_quan_in_gnps, j
 
 
 def _launch_GNPS_workflow_iterative(auth, path_file_mgf_in_gnps, path_file_quan_in_gnps, job_description):
+    """
+    Log in to GNPS, upload files to the MassIVE database, and launch an iterative molecular network workflow.
+
+    Args:
+        auth (Auth): Authentication object with username, password, and email.
+        path_file_mgf_in_gnps (str): The path of the .mfg file uploaded to GNPS.
+        path_file_quan_in_gnps (str): The path of the quantification table uploaded to GNPS.
+        job_description (str): Description of the workflow job.
+
+    Returns:
+        dict: A dictionary containing task IDs for different peak and mass combinations.
+    """
     D_job = {}
     for peak in [6, 5, 4]:
         d = {i: 0 for i in [0.02, 0.1, 10, 25, 50, 100, 250, 500, 0]}
@@ -372,6 +390,18 @@ def closest_gnps_local(mgf):
 
 
 def _load_gnps():
+    """
+    Load GNPS data from an MGF file.
+
+    This function retrieves the path to the GNPS data file, loads the data, and extracts
+    precursor mass information along with the GNPS data objects. It returns a list of
+    precursor masses and a list of GNPS data objects.
+
+    Returns:
+        tuple: A tuple containing two lists:
+            - mass (list): A list of precursor m/z values.
+            - gnps (list): A list of GNPS data objects.
+    """
     path_data_gnps = path_gnps()
     gnps_data = load_from_mgf(path_data_gnps)
     mass = []
@@ -423,7 +453,7 @@ def closest_gnps_iterative(auth, input_file_mgf, input_file_quan):
     dict_data = mgf_instance.data
     job_description = Path(input_file_mgf).stem
     path_file_mgf_in_gnps, path_file_quan_in_gnps = _upload_to_gnps(
-        auth, input_file_mgf, input_file_quan,job_description)
+        auth, input_file_mgf, input_file_quan, job_description)
     dict_task_id = _launch_GNPS_workflow_iterative(
         auth, path_file_mgf_in_gnps, path_file_quan_in_gnps, job_description)
     _wait_for_workflow_finish("gnps.ucsd.edu", dict_task_id[4][0])
@@ -459,6 +489,16 @@ def closest_gnps_iterative(auth, input_file_mgf, input_file_quan):
 
 
 def closest_gnps_ietrative_by_id(dict_task_id, input_file_mgf):
+    """
+    Returns a dictionary of MatchedSpectra objects for the closest matches in GNPS using job IDs.
+
+    Args:
+        dict_task_id (dict): Dictionary containing task IDs for different peak matches.
+        input_file_mgf (str): The local path of the .mfg file.
+
+    Returns:
+        dict: Dictionary {id: MatchedSpectra} for the closest matches based on the provided task IDs.
+    """
     res = {}
     for peak in dict_task_id:
         s = {i: 0 for i in dict_task_id[peak]}

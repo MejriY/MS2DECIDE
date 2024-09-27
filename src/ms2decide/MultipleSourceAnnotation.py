@@ -1,3 +1,26 @@
+"""
+This module provides functionality to annotate spectra data using multiple sources: GNPS, Sirius, and ISDB-Lotus. 
+It offers methods for combining annotations from different tools and organizing the results in a structured format.
+
+Functions:
+    1. MultipleSourceAnnotation: 
+       Combines annotation results from multiple sources (GNPS, Sirius, ISDB-Lotus) and provides a recommendation based on an estimator.
+    
+    2. MultipleSourceAnnotation_to_dataframe:
+       Converts the combined annotation results into a Pandas DataFrame, making it easier to view and analyze the data.
+
+Classes and Libraries Used:
+    - Tool: Represents a specific annotation tool.
+    - Matching, K, K_old: Estimators used for the recommendation process.
+    - ConfEval: Evaluates the consensus of multiple sources.
+    - Tanimotos: Computes similarity scores between annotations based on InChI.
+    - pandas (pd): Used for data manipulation and organization.
+
+Typical usage example:
+    results = MultipleSourceAnnotation(mgf_instance, get_gnps=True, get_sirius=True, get_isdb=False, gnps_res, sirius_res, isdb_res, estimator='Matching')
+    df = MultipleSourceAnnotation_to_dataframe(mgf_instance, get_gnps=True, get_sirius=True, get_isdb=False, gnps_res, sirius_res, isdb_res, results)
+"""
+
 from .Tool import Tool
 from .Matching import Matching
 from .K import K
@@ -9,37 +32,37 @@ import pandas as pd
 
 def MultipleSourceAnnotation(mgf_instance, get_gnps, get_sirius, get_isdb, gnps_res, sirius_res, isdb_res, estimator):
     """
-    Get combined annotations from GNPS, Sirius, and ISDB sources.
+    Get combined annotations from GNPS, Sirius, and ISDB-Lotus sources.
 
     Args:
         mgf_instance (MgfInstance): Instance of MgfInstance containing spectra data.
         get_gnps (bool): Flag to determine whether to get GNPS annotation.
         get_sirius (bool): Flag to determine whether to get Sirius annotation.
-        get_isdb (bool): Flag to determine whether to get ISDB annotation.
+        get_isdb (bool): Flag to determine whether to get ISDB-Lotus annotation.
         gnps_res (dict): Result of GNPS annotation (default=None).
-        sirius_res (dict): Result of Sirius annotation (default=None).
-        isdb_res (dict): Result of ISDB annotation (default=None).
+        sirius_res (SiriusAnnotation): Result of Sirius annotation (default=None). (sirius_res.data is the dict)
+        isdb_res (dict): Result of ISDB-Lotus annotation (default=None).
         estimator (str): ['ConvEval', 'Matching', 'K', 'K_old']
     Returns:
         dict: Dictionary containing combined annotations for each spectrum ID.
     """
-    if(estimator not in ['ConvEval', 'Matching', 'K', 'K_old']):
+    if (estimator not in ['ConvEval', 'Matching', 'K', 'K_old']):
         raise TypeError("error in estimator")
     tool_dict = {}
 
     # GNPS
-    if(get_gnps == True) and (gnps_res != None):
+    if (get_gnps == True) and (gnps_res != None):
         tool_dict[Tool(1).name] = gnps_res
 
     # sirius
-    if(get_sirius == True) and (sirius_res != None):
-        tool_dict[Tool(2).name] = sirius_res
+    if (get_sirius == True) and (sirius_res != None):
+        tool_dict[Tool(2).name] = sirius_res.data
 
     # isdb
-    if(get_isdb == True) and (isdb_res != None):
+    if (get_isdb == True) and (isdb_res != None):
         tool_dict[Tool(3).name] = isdb_res
 
-    if(len(tool_dict) == 0):
+    if (len(tool_dict) == 0):
         print("ERROR")
     else:
         data = {}
@@ -53,37 +76,53 @@ def MultipleSourceAnnotation(mgf_instance, get_gnps, get_sirius, get_isdb, gnps_
                 except:
                     raise TypeError(
                         "can't get annotaion for {ID="+str(ID)+", tool="+str(tool)+"}")
-            if(estimator == 'ConvEval'):
+            if (estimator == 'ConvEval'):
                 data[ID] = ConfEval(dict_index, Tanimotos(
                     dict_inchi)).recommendation()
-            elif(estimator == 'Matching'):
+            elif (estimator == 'Matching'):
                 data[ID] = Matching(dict_index, Tanimotos(dict_inchi)).k()
-            elif(estimator == 'K'):
+            elif (estimator == 'K'):
                 data[ID] = K(dict_index, Tanimotos(dict_inchi)).k()
-            elif(estimator == 'K_old'):
+            elif (estimator == 'K_old'):
                 data[ID] = K_old(dict_index, Tanimotos(dict_inchi)).k()
-        return(data)
+        return (data)
 
 
 def MultipleSourceAnnotation_to_dataframe(mgf_instance, get_gnps, get_sirius, get_isdb, gnps_res, sirius_res, isdb_res, results):
-    if(type(results) != dict):
+    """
+    Converts the combined annotation results into a Pandas DataFrame for easy viewing and analysis.
+
+    Args:
+        mgf_instance (MgfInstance): Instance of MgfInstance containing spectra data.
+        get_gnps (bool): Flag to determine whether to get GNPS annotation.
+        get_sirius (bool): Flag to determine whether to get Sirius annotation.
+        get_isdb (bool): Flag to determine whether to get ISDB annotation.
+        gnps_res (dict): Result of GNPS annotation.
+        sirius_res (SiriusAnnotation): Result of Sirius annotation.
+        isdb_res (dict): Result of ISDB annotation.
+        results (dict): Combined results of different estimators in the form {estimator: results_estimator}.
+
+    Returns:
+        pd.DataFrame: DataFrame containing combined annotations and scores for each spectrum ID.
+    """
+    if (type(results) != dict):
         Exception(
             'results type is no dict \n please insert a resylt : dict {estimator : results_estimator} \n estimator : Matching, K, K_old, ConvEval')
-    if(len(set(results.keys()) - set(['Matching', 'K', 'K_old', 'ConvEval'])) != 0):
+    if (len(set(results.keys()) - set(['Matching', 'K', 'K_old', 'ConvEval'])) != 0):
         Exception(
             'please insert a resylt : dict {estimator : results_estimator} \n estimator : Matching, K, K_old, ConvEval')
     tool_dict = {}
 
     # GNPS
-    if(get_gnps == True) and (gnps_res != None):
+    if (get_gnps == True) and (gnps_res != None):
         tool_dict[Tool(1).name] = gnps_res
 
     # sirius
-    if(get_sirius == True) and (sirius_res != None):
-        tool_dict[Tool(2).name] = sirius_res
+    if (get_sirius == True) and (sirius_res != None):
+        tool_dict[Tool(2).name] = sirius_res.data
 
     # isdb
-    if(get_isdb == True) and (isdb_res != None):
+    if (get_isdb == True) and (isdb_res != None):
         tool_dict[Tool(3).name] = isdb_res
 
     data = []
@@ -105,4 +144,4 @@ def MultipleSourceAnnotation_to_dataframe(mgf_instance, get_gnps, get_sirius, ge
         data.append(l)
     df = pd.DataFrame(data, columns=['ID', 'inchi_gnps', 'score_gnps', 'inchi_sirius',
                       'score_sirius', 'inchi_isdb', 'score_isdb', 'tgs', 'tgi', 'tsi']+list(results.keys()))
-    return(df)
+    return (df)

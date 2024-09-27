@@ -152,6 +152,15 @@ def _correct_inchi_string(inchi):
 
 
 def _is_mol(inc):
+    """
+    Check if the input is a valid molecular structure and return its InChI representation.
+
+    Args:
+        inc (str): The InChI or SMILES representation.
+
+    Returns:
+        str: The InChI representation of the molecule, or '?' if invalid.
+    """
     try:
         mol = Chem.MolFromInchi(inc)
     except:
@@ -201,6 +210,16 @@ def get_correct_inchi(data):
 
 
 def _sirius_score_calcule(score, d):
+    """
+    Calculate the score based on the specified criterion.
+
+    Args:
+        score (str): The scoring criterion ('confidencescore', 'zodiacscore', 'confzodiac', etc.).
+        d (dict): A dictionary containing relevant scores.
+
+    Returns:
+        float: The calculated score based on the input parameters.
+    """
     if (score == 'confidencescore'):
         if (str(d['confidencescore']) == 'nan'):
             if (d['zodiacscore'] == 1):
@@ -408,6 +427,19 @@ def _eta_matching(a, b, cutoff, x):
 ######## local librery search ##
 
 def _find_matches(spec1_mz, spec2_mz, tolerance, shift):
+    """
+    Find matching peaks between two mass spectra within a specified tolerance.
+
+    Args:
+        spec1_mz (numpy.ndarray): Array of m/z values from the first spectrum.
+        spec2_mz (numpy.ndarray): Array of m/z values from the second spectrum.
+        tolerance (float): The allowed deviation in m/z values for peaks to be considered a match.
+        shift (float): An additional value to shift the m/z values of the second spectrum.
+
+    Returns:
+        list: A list of tuples, where each tuple contains the indices of matching peaks 
+              from the first and second spectra.
+    """
     lowest_idx = 0
     matches = []
     for peak1_idx in range(spec1_mz.shape[0]):
@@ -426,6 +458,18 @@ def _find_matches(spec1_mz, spec2_mz, tolerance, shift):
 
 
 def _mass_selection_by_tolerance(sp, query_mass, query, tolerance):
+    """
+    Select query elements based on their proximity to a specified mass within a given tolerance.
+
+    Args:
+        sp (object): An object containing metadata, particularly 'precursor_mz'.
+        query_mass (list or numpy.ndarray): Array of mass values to be matched against the precursor mass.
+        query (list): List of query objects corresponding to the masses.
+        tolerance (float): The maximum allowable difference between the query mass and the precursor mass for a match.
+
+    Returns:
+        list: A list of selected query objects that match the specified mass within the tolerance.
+    """
     m = sp.metadata['precursor_mz']
     idx = np.argwhere(np.abs(np.array(query_mass)-m) <= tolerance).flatten()
     selected = [query[i] for i in idx]
@@ -433,6 +477,20 @@ def _mass_selection_by_tolerance(sp, query_mass, query, tolerance):
 
 
 def _get_match(sp, query, tolerance, mz_power, intensity_power, shift):
+    """
+    Retrieve the best match from a spectrum based on a given query and scoring method.
+
+    Args:
+        sp (object): The spectrum object containing mass peaks and metadata.
+        query (list): A list of query objects to match against the spectrum.
+        tolerance (float): The allowable mass difference for matching peaks.
+        mz_power (float): Power applied to mass values for scoring (not directly used here).
+        intensity_power (float): Power applied to intensity values for scoring.
+        shift (float): Value to shift the mass values during matching.
+
+    Returns:
+        list: A list containing the best matching query object and its score.
+    """
     score = ModifiedCosine(tolerance=tolerance,
                            intensity_power=intensity_power)
     if (len(query) == 0):

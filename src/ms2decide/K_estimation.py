@@ -7,7 +7,17 @@ from .MultipleSourceAnnotation import MultipleSourceAnnotation, MultipleSourceAn
 
 
 def K_estimation():
+    """
+    Estimate K values for compounds based on GNPS, ISDB, and Sirius annotations.
 
+    This function prompts the user for various input file paths, including an authentication file,
+    quantitative data, MGF data, and the results of a Sirius job. It then retrieves and processes
+    annotation data from multiple sources and compiles the results into a dataframe filtered by specific
+    precursor mass criteria.
+
+    Returns:
+        DataFrame: A dataframe containing the filtered results based on K estimation.
+    """
     auth_path = input('SELECT THE PATH FOR YOUR AUTH.TXT FILE \n :')
     auth = AuthMail.from_txt(auth_path)
 
