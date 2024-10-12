@@ -15,7 +15,7 @@ class SiriusAnnotation():
         __init__(path, mgf_instance): Initializes SiriusAnnotation object.
     """
 
-    def __init__(self, path, mgf_instance):
+    def __init__(self, path, mgf_instance, indexScore):
         """
         Initializes a SiriusAnnotation object.
 
@@ -24,6 +24,14 @@ class SiriusAnnotation():
             mgf_instance (MgfInstance): An instance of MgfInstance containing Mass Spectrometry data.
         """
         self.path = path
+        indexScore = str(indexScore).lower()
+        while (indexScore not in ['exact', 'approximate']):
+            indexScore = input('Select index score =  exact, approximate')
+            indexScore = str(indexScore).lower()
+        if (indexScore == 'exact'):
+            indexScore = 'confidencescoreexact'
+        else:
+            indexScore = 'confidencescoreapproximate'
 
         data_sirius = pd.read_table(path)
         data_sirius = data_sirius.rename(columns=str.lower)
@@ -34,7 +42,7 @@ class SiriusAnnotation():
         data = {}
         for ID in mgf_instance.data:
             if (ID in data_sirius):
-                sc = data_sirius[ID]['confidencescoreexact']
+                sc = data_sirius[ID][indexScore]
                 if (str(sc) == '-inf'):
                     sc = 0
                 data[ID] = MatchedSpectra(

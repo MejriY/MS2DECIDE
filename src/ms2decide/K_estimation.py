@@ -26,10 +26,11 @@ def K_estimation():
     mgf = MgfInstance(mgf_path)
     sirius_path = input(
         'SELECT THE PATH FOR THE RESULT OF SIRIUS JOB (THE structure_identifications.tsv) \n :')
+    indexScore = input('Select index score =  exact, approximate')
 
     gnps_res = closest_gnps_iterative(auth, mgf_path, quan_path)
     isdb_res = get_cfm_annotation(mgf)
-    sirius_res = SiriusAnnotation(sirius_path)
+    sirius_res = SiriusAnnotation(sirius_path,mgf,indexScore)
 
     get_gnps, get_sirius, get_isdb = True, True, True
     results = {}

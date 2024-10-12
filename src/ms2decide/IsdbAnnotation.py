@@ -35,7 +35,7 @@ parent = os.path.dirname(current)
 sys.path.append(parent)
 
 
-def get_cfm_annotation(mgf_instance):
+def get_cfm_annotation(mgf_instance, tol=0.02):
     """
     Returns ISDB-Lotus annotations based on ISDB-Lotus subdivision.
 
@@ -45,10 +45,10 @@ def get_cfm_annotation(mgf_instance):
     Returns:
         dict: A dictionary where the key is the spectrum ID and the value is a MatchedSpectra object with ISDB-Lotus annotation.
     """
-    return (_get_cfm_annotation(mgf_instance))
+    return (_get_cfm_annotation(mgf_instance, tol=tol))
 
 
-def _get_cfm_annotation(mgf, ion_mode='pos'):
+def _get_cfm_annotation(mgf, ion_mode='pos', tol=0.02):
     """
     Internal function to get ISDB-Lotus annotations for the given MGF instance.
 
@@ -61,6 +61,8 @@ def _get_cfm_annotation(mgf, ion_mode='pos'):
     """
     isdb_mass, isdb = _load_isdb(ion_mode)
     tolerance, mz_power, intensity_power, shift = Parametres()
+    tolerance = tol
+
     print('==================')
     print('cfm file is loaded')
     print('==================')

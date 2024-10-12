@@ -85,8 +85,12 @@ class K():
         tgs, tgi, tsi = self.tanimotos.compute_tanimoto()
         cg, cs, ci = self.similarities[Tool(1).name], self.similarities[Tool(2).name], self.similarities[Tool(3).name]
         if(self.tanimotos.data['SIRIUS']=='#'):
-            tgs=0.25
+            tgs+=0.25
+            tsi+=0.25
             cs=0.5
+        if(self.tanimotos.data['GNPS']=='*'):
+            tgs+=0.25
+            tgi+=0.25
         g = self.eta_g(cg)
         s = self.eta_s(cs)
         i = self.eta_i(ci)

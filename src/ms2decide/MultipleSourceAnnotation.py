@@ -32,7 +32,7 @@ import pandas as pd
 
 def MultipleSourceAnnotation(mgf_instance, get_gnps, get_sirius, get_isdb, gnps_res, sirius_res, isdb_res, estimator):
     """
-    Get combined annotations from GNPS, Sirius, and ISDB-Lotus sources.
+    Get aggregated annotations from GNPS, Sirius, and ISDB-Lotus sources.
 
     Args:
         mgf_instance (MgfInstance): Instance of MgfInstance containing spectra data.
@@ -133,10 +133,17 @@ def MultipleSourceAnnotation_to_dataframe(mgf_instance, get_gnps, get_sirius, ge
         score_sirius = tool_dict[Tool(2).name][ID].score
         inchi_isdb = tool_dict[Tool(3).name][ID].inchi
         score_isdb = tool_dict[Tool(3).name][ID].score
-
+        
         dict_inchi = {i: tool_dict[i][ID].inchi for i in tool_dict}
         t = Tanimotos(dict_inchi)
         tgs, tgi, tsi = t.compute_tanimoto()
+        if(inchi_sirius=='#'):
+            tgs+=0.25
+            tsi+=0.25
+            score_sirius=0.5
+        if(inchi_gnps=='*'):
+            tgs+=0.25
+            tgi+=0.25
         l = [ID, inchi_gnps, score_gnps, inchi_sirius,
              score_sirius, inchi_isdb, score_isdb, tgs, tgi, tsi]
         for estimator in results:
