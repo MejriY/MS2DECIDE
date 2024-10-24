@@ -27,9 +27,12 @@ def K_estimation():
     sirius_path = input(
         'SELECT THE PATH FOR THE RESULT OF SIRIUS JOB (THE structure_identifications.tsv) \n :')
     indexScore = input('Select index score =  exact, approximate')
-
-    gnps_res = closest_gnps_iterative(auth, mgf_path, quan_path)
-    isdb_res = get_cfm_annotation(mgf)
+    gnps_res = closest_gnps_iterative(auth, mgf_path, quan_path)        
+    ISDBtol = input('SELECT MASS TOLENRENCE FOR ISDB-LOTUS, DEFAULT 0.02')
+    if(type(ISDBtol)==int)or(type(ISDBtol)==float):
+        isdb_res = get_cfm_annotation(mgf,ISDBtol)
+    else:
+        isdb_res = get_cfm_annotation(mgf,ISDBtol)
     sirius_res = SiriusAnnotation(sirius_path,mgf,indexScore)
 
     get_gnps, get_sirius, get_isdb = True, True, True
