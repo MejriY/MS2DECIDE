@@ -2,6 +2,12 @@
 
 image::https://github.com/MejriY/Decide_test/raw/master/image/ms2decide_logo.png[]
 
+== Instalation
+[source,console]
+----
+pip install 'MS2DECIDE_Folder'
+----
+
 image::https://github.com/MejriY/Decide_test/raw/master/image/all_article_workflow.png[]
 
 == The logic behind the tool
