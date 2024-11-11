@@ -20,10 +20,11 @@ classifiers = [
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = ["rdkit", "matchms==0.25.0", "pandas", "requests", "pytest", "responses"]
+dependencies = ["rdkit", "matchms==0.26.4", "pandas", "requests", "pytest", "responses"]
 
 [project.urls]
 Documentation = "https://github.com/unknown/ms2decide#readme"
@@ -51,7 +52,7 @@ cov = [
 ]
 
 [[tool.hatch.envs.all.matrix]]
-python = ["3.8", "3.9", "3.10", "3.11"]
+python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
 [tool.hatch.envs.types]
 dependencies = [
