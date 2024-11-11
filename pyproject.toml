@@ -24,7 +24,7 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = ["rdkit", "matchms", "py4cytoscape", "numpy", "pandas", "openpyxl", "requests", "PyGithub", "jupyter", "pytest", "responses"]
+dependencies = ["rdkit", "matchms", "pandas", "openpyxl", "requests", "jupyter", "pytest", "responses", "subprocess", "ftplib", "zipfile", "getpass"]
 
 [project.urls]
 Documentation = "https://github.com/unknown/ms2decide#readme"
