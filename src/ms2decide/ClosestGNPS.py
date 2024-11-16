@@ -59,7 +59,7 @@ def _invoke_workflow(auth, base_url, parameters):
 
 def _upload_to_gnps(auth, input_file_mgf, input_file_quan, folder):
     """
-    Log in to the MassIVE database (GNPS database) to upload a given file.
+    Log in to the MassIVE repository (GNPS library) to upload a given file.
 
     Args:
         auth (Auth): Authentication object with username and password.
@@ -186,12 +186,12 @@ def _get_iterative_parameters():
 
 def _launch_GNPS_workflow(auth, path_file_mgf_in_gnps, path_file_quan_in_gnps, job_description):
     """
-    Log in to GNPS using username and password, upload file to MassIVE database, and launch molecular network workflow.
+    Log in to GNPS using username and password, upload file to MassIVE repository, and launch feature-based molecular networking workflow.
 
     Args:
         auth (Auth): Authentication object with username, password, and email.
         file_path (str): The local path of the .mfg file.
-        job_description (str): Title of the workflow.
+        job_description (str): Title of the job.
 
     Returns:
         str: Task ID of the launched workflow.
@@ -212,13 +212,13 @@ def _launch_GNPS_workflow(auth, path_file_mgf_in_gnps, path_file_quan_in_gnps, j
 
 def _launch_GNPS_workflow_iterative(auth, path_file_mgf_in_gnps, path_file_quan_in_gnps, job_description):
     """
-    Log in to GNPS, upload files to the MassIVE database, and launch an iterative molecular network workflow.
+    Log in to GNPS, upload files to the MassIVE repository, and launch iterative weighted analog search jobs.
 
     Args:
         auth (Auth): Authentication object with username, password, and email.
         path_file_mgf_in_gnps (str): The path of the .mfg file uploaded to GNPS.
         path_file_quan_in_gnps (str): The path of the quantification table uploaded to GNPS.
-        job_description (str): Description of the workflow job.
+        job_description (str): Title of the job.
 
     Returns:
         dict: A dictionary containing task IDs for different peak and mass combinations.
@@ -374,7 +374,6 @@ def closest_gnps_local(mgf):
     gnps_mass, gnps = _load_gnps()
     tolerance, mz_power, intensity_power, shift = Parametres()
     print('==================')
-    print('cfm file is loaded')
     print('==================')
     RES = {}
     for i in mgf.data:
