@@ -1,10 +1,10 @@
 """
-This module provides functionality to annotate spectra data using multiple sources: GNPS, Sirius, and ISDB-Lotus. 
+This module provides functionality to annotate spectra data using multiple sources: GNPS, Sirius, and ISDB-LOTUS. 
 It offers methods for combining annotations from different tools and organizing the results in a structured format.
 
 Functions:
     1. MultipleSourceAnnotation: 
-       Combines annotation results from multiple sources (GNPS, Sirius, ISDB-Lotus) and provides a recommendation based on an estimator.
+       Combines annotation results from multiple sources (GNPS, Sirius, ISDB-LOTUS) and provides a recommendation based on an estimator.
     
     2. MultipleSourceAnnotation_to_dataframe:
        Converts the combined annotation results into a Pandas DataFrame, making it easier to view and analyze the data.
@@ -32,7 +32,7 @@ import pandas as pd
 
 def MultipleSourceAnnotation(mgf_instance, get_gnps, get_sirius, get_isdb, gnps_res, sirius_res, isdb_res, estimator):
     """
-    Get aggregated annotations from GNPS, Sirius, and ISDB-Lotus sources.
+    Get aggregated annotations from GNPS, Sirius, and ISDB-LOTUS sources.
 
     Args:
         mgf_instance (MgfInstance): Instance of MgfInstance containing spectra data.
@@ -96,10 +96,10 @@ def MultipleSourceAnnotation_to_dataframe(mgf_instance, get_gnps, get_sirius, ge
         mgf_instance (MgfInstance): Instance of MgfInstance containing spectra data.
         get_gnps (bool): Flag to determine whether to get GNPS annotation.
         get_sirius (bool): Flag to determine whether to get Sirius annotation.
-        get_isdb (bool): Flag to determine whether to get ISDB annotation.
+        get_isdb (bool): Flag to determine whether to get ISDB-LOTUS annotation.
         gnps_res (dict): Result of GNPS annotation.
         sirius_res (SiriusAnnotation): Result of Sirius annotation.
-        isdb_res (dict): Result of ISDB annotation.
+        isdb_res (dict): Result of ISDB-LOTUS annotation.
         results (dict): Combined results of different estimators in the form {estimator: results_estimator}.
 
     Returns:
