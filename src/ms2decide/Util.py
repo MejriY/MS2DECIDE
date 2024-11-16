@@ -52,7 +52,7 @@ def _downolad_file(path, tool):
 
 def _check_file_and_download(tool):
     """
-    Check if the file for the specified tool exists, and download if not.
+    Check if the file for the specified tool exists, and download it if not.
 
     Args:
         tool (str): The tool name.
@@ -61,7 +61,7 @@ def _check_file_and_download(tool):
         Path: The path to the downloaded file.
     """
     isdb_path = input(
-        'SELECT DIRECTORY OF ISDB DATA \n IF MGF FILE NOT THERE, FILE WILL BE DONWLOADED : \n')
+        'SELECT DIRECTORY OF ISDB-LOTUS DATA \n IF THE MGF FILE IS NOT THERE, THE LIBRARY WILL BE DOWNLOADED : \n')
     # if (isdb_path[-2:] != "\\"):
     #     isdb_path += '\\'
 
@@ -69,11 +69,11 @@ def _check_file_and_download(tool):
         print('==========> FILE ALREADY IN DIRECTORY')
         s = Path(isdb_path+tool+'.mgf')
     else:
-        print('==========> DIRECTORY EXIST WITHOUT FILES')
+        print('==========> DIRECTORY EXISTS WITHOUT FILES')
         print('==================')
         print('BEGIN DOWNLOAD')
         _downolad_file(isdb_path, tool)
-        print('==========> FILE DOWNLOAD IN DIRECTORY')
+        print('==========> FILE DOWNLOADED IN DIRECTORY')
         s = Path(isdb_path+tool+'.mgf')
     return (s)
 
@@ -424,7 +424,7 @@ def _eta_matching(a, b, cutoff, x):
         return (a[3]*x+b[3])
 
 
-######## local librery search ##
+######## local library search ##
 
 def _find_matches(spec1_mz, spec2_mz, tolerance, shift):
     """
