@@ -27,23 +27,23 @@ def K_estimation():
     auth = AuthMail(username, password, mail)
 
     quan_path = input('SELECT THE PATH FOR YOUR QUANTITATIVE FILE \n :')
-    mgf_path = input('SELECT THE PATH OF YOU MGF FILE \n :')
+    mgf_path = input('SELECT THE PATH FOR YOU MGF FILE \n :')
     mgf = MgfInstance(Path(mgf_path))
-    job_description = input('INPUT THE TITLE OF THE GNPS JOB \n :')
+    job_description = input('INPUT THE TITLE FOR YOUR FBMN GNPS JOB \n :')
     path_file_mgf_in_gnps, path_file_quan_in_gnps = _upload_to_gnps(
         auth, Path(mgf_path), Path(quan_path), job_description)
     dict_task_id = _launch_GNPS_workflow_iterative(
         auth, path_file_mgf_in_gnps, path_file_quan_in_gnps, job_description)
 
     ISDBtol = float(
-        input('SELECT MASS TOLERANCE FOR ISDB-LOTUS LESS THAN 0.5, DEFAULT 0.02 '))
+        input('SELECT MASS TOLERANCE FOR ISDB-LOTUS ANNOTATION (LESS THAN 0.5, DEFAULT 0.02 '))
     while (ISDBtol > 0.5):
         ISDBtol = input(
-            'SELECT MASS TOLERANCE FOR ISDB-LOTUS LESS THAN 0.5, DEFAULT 0.02 ')
+            'SELECT MASS TOLERANCE FOR ISDB-LOTUS ANNOTATION LESS THAN 0.5, DEFAULT 0.02 ')
     isdb_res = get_cfm_annotation(mgf, ISDBtol)
 
     sirius_path = input(
-        'SELECT THE PATH FOR THE RESULTS OF SIRIUS JOB (structure_identifications.tsv) \n :')
+        'SELECT THE PATH FOR YOUR SIRIUS6 ANNOTATION FILE (structure_identifications.tsv) \n :')
     indexScore = input('Select index score =  exact, approximate')
     sirius_res = SiriusAnnotation(sirius_path, mgf, indexScore)
 
