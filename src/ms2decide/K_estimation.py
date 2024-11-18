@@ -47,10 +47,14 @@ def K_estimation():
     indexScore = input('Select index score =  exact, approximate')
     sirius_res = SiriusAnnotation(sirius_path, mgf, indexScore)
 
-    flag = _wait_for_workflow_finish("gnps.ucsd.edu", dict_task_id[4][0])
-    while (flag != 'DONE'):
+    state = {i: {j: _wait_for_workflow_finish(
+        "gnps.ucsd.edu", dict_task_id[i][j]) for j in dict_task_id[i]}for i in dict_task_id}
+    while (state != {'DONE'}):
+        if ('FAILED' in state):
+            raise Exception('FAILED in GNPS Job')
         time.sleep(100)
-        flag = _wait_for_workflow_finish("gnps.ucsd.edu", dict_task_id[4][0])
+        state = {i: {j: _wait_for_workflow_finish(
+            "gnps.ucsd.edu", dict_task_id[i][j]) for j in dict_task_id[i]}for i in dict_task_id}
 
     gnps_res = closest_gnps_ietrative_by_id(dict_task_id, mgf_path)
 
