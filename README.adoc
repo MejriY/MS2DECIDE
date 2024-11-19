@@ -8,36 +8,50 @@ MS2DECIDE is a Python library that leverages decision theory to assist chemists 
 
 Follow these steps to install **MS2DECIDE**:
 
-1. Ensure Python is installed
-   Before proceeding, make sure Python (version 3.7 or higher) is installed on your system. You can download it from [python.org](https://www.python.org/).  
+1. **Ensure Python is installed**  
+   Before proceeding, make sure Python (version 3.7 or higher) is installed on your system. You can download it from https://www.python.org.  
    - On Windows: Install Python and check the box to add it to your system's PATH.
    - On Mac/Linux: Python is often pre-installed, but ensure it's the correct version by running:
      ```
      python3 --version
      ```
 
-2. Set up a virtual environment (optional but recommended)
+[source,console]
+----
+python3 --version
+----
+
+2. **Set up a virtual environment (optional but recommended)**  
    To avoid conflicts with other Python packages, create a virtual environment:
-   ```
-   python3 -m venv ms2decide_env
-   source ms2decide_env/bin/activate  # On Windows: ms2decide_env\Scripts\activate
-   ```
 
-3. Install the library
+[source,console]
+----
+python3 -m venv ms2decide_env
+source ms2decide_env/bin/activate  // On Windows: ms2decide_env\Scripts\activate
+----
+
+3. **Install the library**  
    Navigate to the directory containing the **MS2DECIDE_Folder** (replace with the correct folder name or path), and install it using `pip`:
-   ```
-   pip install MS2DECIDE_Folder.
-   ```
-   If you are installing from a GitHub repository, use:
-   ```
-   pip install git+https://github.com/<username>/<repository>.git
-   ```
 
-4. Verify the installation  
+[source,console]
+----
+pip install MS2DECIDE_Folder.
+----
+
+   If you are installing from a GitHub repository, use:
+
+[source,console]
+----
+pip install git+https://github.com/<username>/<repository>.git
+----
+
+4. **Verify the installation**  
    Check if the library is installed successfully:
-   ```
-   python -c "import ms2decide; print('MS2DECIDE installed successfully!')"
-   ```
+
+[source,console]
+----
+python -c "import ms2decide; print('MS2DECIDE installed successfully!')"
+----
 
 
 image::https://github.com/MejriY/Decide_test/raw/master/image/all_article_workflow.png[]
