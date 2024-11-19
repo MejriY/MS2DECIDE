@@ -2,7 +2,7 @@
 
 image::https://github.com/MejriY/Decide_test/raw/master/image/ms2decide_logo.png[]
 
-MS2DECIDE is a Python library that leverages decision theory to assist chemists in metabolite annotation and analysis. By gathering insights from domain experts and modeling their intuition, the library offers a structured, data-driven approach to interpreting mass spectrometry results. MS2DECIDE integrates tools like GNPS and Sirius, enhanced with innovative methods such as Weighted Iterative GNPS Analog Search (WIGAS), to deliver reliable annotations even in uncertain scenarios. This library bridges expert knowledge and computational efficiency, simplifying complex workflows and enabling chemists to make informed, confident decisions in metabolite research.
+MS2DECIDE is a Python library that leverages decision theory to assist chemists in natural products annotation and targeting. By gathering insights from domain experts and modeling their intuition, the library offers a structured, data-driven approach to interpreting multiannotated tandem mass spectrometry data. MS2DECIDE integrates GNPS , (enhanced with a weighted iterative analog search), ISDB-LOTUS and Sirius6 annotations to deliver reliable recommendation even in uncertain scenarios. This library bridges expert knowledge and computational efficiency, simplifying complex workflows and enabling chemists to make informed, confident decisions in metabolite research.
 
 == Instalation
 You can install **MS2DECIDE** using either `pip` (recommended for most users) or `conda`. Follow the instructions below based on your preferred method:
@@ -39,7 +39,7 @@ conda activate ms2decide_env
 ----
 
 3. **Install the library**  
-   You can install it using `pip` by replacing `MS2DECIDE_Folder` with the actual path to the folder.:
+   You can install it using `pip` by replacing `MS2DECIDE_Folder` with the actual path to the folder:
 
 [source,console]
 ----
