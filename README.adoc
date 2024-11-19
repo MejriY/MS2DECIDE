@@ -9,7 +9,7 @@ MS2DECIDE is a Python library that leverages decision theory to assist chemists 
 Follow these steps to install **MS2DECIDE**:
 
 1. **Ensure Python is installed**  
-   Before proceeding, make sure Python (version 3.7 or higher) is installed on your system. You can download it from https://www.python.org.  
+   Before proceeding, make sure Python (version 3.7 or higher) is installed on your system. You can download it from https://www.python.org/downloads/.  
    - On Windows: Install Python and check the box to add it to your system's PATH.
    - On Mac/Linux: Python is often pre-installed, but ensure it's the correct version by running:
      ```
@@ -42,7 +42,7 @@ pip install MS2DECIDE_Folder.
 
 [source,console]
 ----
-pip install git+https://github.com/<username>/<repository>.git
+pip install git+https://github.com/MejriY/MS2DECIDE.git
 ----
 
 4. **Verify the installation**  
