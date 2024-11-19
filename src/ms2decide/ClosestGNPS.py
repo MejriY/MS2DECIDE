@@ -309,24 +309,15 @@ def _gnps_annotations_download_results(task_id):
     return (df_annotations)
 
 
-def _wait_for_workflow_finish(base_url, task_id):
-    """
-    Wait for the workflow to finish.
-
-    Args:
-        base_url (str): Base URL of the workflow.
-        task_id (str): Task ID of the workflow.
-
-    Returns:
-        str: Status of the workflow.
-    """
-    url = 'https://' + base_url + '/ProteoSAFe/status_json.jsp?task=' + task_id
-    json_obj = json.loads(requests.get(url, verify=False).text)
-    while (json_obj["status"] != "FAILED" and json_obj["status"] != "DONE" and json_obj["status"] != "SUSPENDED"):
-        print("Waiting for task: " + task_id)
-        time.sleep(10)
-        json_obj = json.loads(requests.get(url, verify=False).text)
-    return json_obj["status"]
+def _wait_for_workflow_finish(dict_task_id):
+    state = set()
+    url = 'https://gnps.ucsd.edu/ProteoSAFe/status_json.jsp?task={}'
+    for peak in dict_task_id:
+        for mass in dict_task_id[peak]:
+            json_obj = json.loads(requests.get(url.format(
+                dict_task_id[peak][mass]), verify=False).text)
+            state.add(json_obj["status"])
+    return (state)
 
 
 def closest_gnps(auth, input_file_mgf, input_file_quan):
