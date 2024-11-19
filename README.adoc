@@ -8,7 +8,7 @@ MS2DECIDE is a Python library that leverages decision theory to assist chemists 
 You can install **MS2DECIDE** using either `pip` (recommended for most users) or `conda`. Follow the instructions below based on your preferred method:
 
 1. **Ensure Python is installed**  
-   Before proceeding, make sure Python (version 3.7 or higher) is installed on your system. You can download it from https://www.python.org.  
+   Before proceeding, make sure Python (version 3.7 or higher) is installed on your system. You can download it from https://www.python.org/downloads/.  
    - On Windows: Install Python and check the box to add it to your system's PATH.
    - On Mac/Linux: Python is often pre-installed, but ensure it's the correct version by running:
 
@@ -17,7 +17,7 @@ You can install **MS2DECIDE** using either `pip` (recommended for most users) or
 python3 --version
 ----
 
-Alternatively, you can use **Conda**, which includes Python. Download and install Conda from https://conda.io.
+Alternatively, you can use **Conda**, which includes Python. Download and install Conda from https://docs.conda.io/projects/conda/en/stable/.
 
 2. **Set up a virtual environment**  
    Create an isolated environment using either `venv` or `conda`.
@@ -39,18 +39,18 @@ conda activate ms2decide_env
 ----
 
 3. **Install the library**  
-   Navigate to the directory containing the **MS2DECIDE_Folder** (replace with the correct folder name or path), and install it using `pip`:
+   You can install it using `pip` by replacing `MS2DECIDE_Folder` with the actual path to the folder.:
 
 [source,console]
 ----
-pip install .
+pip install 'MS2DECIDE_Folder'.
 ----
 
    If you are installing from a GitHub repository, use:
 
 [source,console]
 ----
-pip install git+https://github.com/<username>/<repository>.git
+pip install git+https://github.com/MejriY/MS2DECIDE.git
 ----
 
 4. **Verify the installation**  
