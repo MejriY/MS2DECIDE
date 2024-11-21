@@ -89,8 +89,8 @@ class K():
             tsi+=0.25
             cs=0.5
         if(self.tanimotos.data['GNPS']=='*'):
-            tgs+=0.25
-            tgi+=0.25
+            tgs+=0.7
+            tgi+=0.7
         g = self.eta_g(cg)
         s = self.eta_s(cs)
         i = self.eta_i(ci)

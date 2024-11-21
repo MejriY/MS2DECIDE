@@ -6,7 +6,6 @@ build-backend = "hatchling.build"
 name = "ms2decide"
 dynamic = ["version"]
 description = ''
-readme = "README.md"
 requires-python = ">=3.8"
 license = "MIT"
 keywords = []

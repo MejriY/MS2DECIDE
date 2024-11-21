@@ -3,18 +3,14 @@ from .MgfInstance import MgfInstance
 from .Util import path_gnps, Parametres, get_correct_inchi, _mass_selection_by_tolerance, _get_match
 from matchms.importing import load_from_mgf
 from matchms import Spectrum
-import os
-import subprocess
-import shlex
-import zipfile
+import urllib.request
 import json
-import time
 import requests
 import sys
 import pandas as pd
 from pathlib import Path
 import ftplib
-import datetime
+# import datetime
 
 
 def _invoke_workflow(auth, base_url, parameters):
@@ -258,54 +254,15 @@ def _gnps_annotations_download_results(task_id):
     # Base link to download GNPS job annotations
     if (task_id[:3].lower() == 'id='):
         task_id = task_id[3:]
-    gnps_download_link = "https://gnps.ucsd.edu/ProteoSAFe/DownloadResult?task=" + \
-        task_id+"&view=view_all_annotations_DB"
+    gnps_download_link = 'https://gnps.ucsd.edu/ProteoSAFe/result_json.jsp?task={}&view=view_all_annotations_DB'
     # Launch the download
+    with urllib.request.urlopen(gnps_download_link.format(task_id)) as url:
+        data = json.load(url)
+    df_annotations = pd.DataFrame.from_dict(data['blockData'])
     print('==================')
-    print('This is the GNPS job link: https://gnps.ucsd.edu/ProteoSAFe/status.jsp?task='+task_id)
-    print("Downloading the following content: " + str(gnps_download_link))
-    # output_folder = folder to storge gnps download but will be deleted in the end
-    output_folder = 'GNPS_annotation'
-    # Clearing local files
-    if (output_folder+'.zip' in os.listdir()):
-        subprocess.call(shlex.split('rm '+output_folder+'.zip'))
-    cmd = 'curl -d "" '+gnps_download_link+' -o '+output_folder+'.zip'
-    # Call the process and catch errors
-    try:
-        subprocess.call(shlex.split(cmd))
-    except subprocess.CalledProcessError as e:
-        print(e.output)
-
-    zip_gnps_annotation = Path(output_folder+'.zip')
-
-    l = zipfile.ZipFile(zip_gnps_annotation).namelist()
-    # We are gonna check if this is classical molecular networking job
-    try:
-        path = [i for i in l if ('DB_analogresult' in i)][0]
-        archive = zipfile.ZipFile(zip_gnps_annotation, 'r')
-        df_annotations = pd.read_csv(archive.open(str(path)), sep='\t')
-        archive.close()
-        print('==================')
-        print('   FBMN job detected')
-        print('==================')
-        print('      '+str(df_annotations.shape[0]-1) +
-              ' spectral library annotations in the job.')
-    # If it is not a classical molecular networking job, we try feature-based molecular networking
-    except:
-        try:
-            path = [i for i in l if ('DB_result' in i)][0]
-            archive = zipfile.ZipFile(zip_gnps_annotation, 'r')
-            df_annotations = pd.read_csv(archive.open(str(path)), sep='\t')
-            archive.close()
-            print('==================')
-            print('   FBMN job detected')
-            print('==================')
-            print('      '+str(df_annotations.shape[0]-1) +
-                  ' spectral library annotations in the job.')
-        except:
-            raise Exception('check the job ID and/or job type')
-    df_annotations['InChI'] = df_annotations['INCHI']
-    os.remove(zip_gnps_annotation)
+    print(' FBMN job detected with ' +
+          str(df_annotations.shape[0]-1) + ' spectral library annotations in the job:' + task_id)
+    print('==================')
     return (df_annotations)
 
 

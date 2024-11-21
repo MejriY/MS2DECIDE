@@ -24,7 +24,7 @@ Typical usage example:
 """
 
 from .MatchedSpectra import MatchedSpectra
-from .Util import path_isdb, Parametres, get_correct_inchi, _mass_selection_by_tolerance, _get_match
+from .Util import path_isdb, Parametres, get_correct_inchi, _mass_selection_by_tolerance, _get_match, _downolad_file
 from matchms.importing import load_from_mgf
 from matchms import Spectrum
 import numpy as np
@@ -103,3 +103,48 @@ def _load_isdb(ion_mode):
         mass.append(i.metadata['precursor_mz'])
         isdb.append(i)
     return mass, isdb
+
+
+def get_cfm_annotation_GUI(path_isdb, mgf, ion_mode='pos', tol=0.02):
+    """
+    Internal function to get ISDB-Lotus annotations for the given MGF instance.
+
+    Args:
+        mgf (MgfInstance): An instance of MgfInstance containing spectra data.
+        ion_mode (str, optional): Specifies the ionization mode ('pos' for positive, 'neg' for negative). Defaults to 'pos'.
+
+    Returns:
+        dict: A dictionary where the key is the spectrum ID and the value is a MatchedSpectra object with ISDB-Lotus annotation.
+    """
+    if (str(path_isdb)[-4:] != '.mgf'):
+        tool = 'isdb_'+ion_mode
+        _downolad_file(path_isdb, tool)
+        path_isdb = str(path_isdb)+'\\'+tool+'.mgf'
+    isdb_data = load_from_mgf(str(path_isdb))
+    isdb_mass = []
+    isdb = []
+    for i in isdb_data:
+        isdb_mass.append(i.metadata['precursor_mz'])
+        isdb.append(i)
+
+    tolerance, mz_power, intensity_power, shift = Parametres()
+    tolerance = tol
+
+    print('==================')
+    print('cfm file is loaded')
+    print('==================')
+    RES = {}
+    for i in mgf.data:
+        sp = mgf.data[i]
+        selected = _mass_selection_by_tolerance(sp, isdb_mass, isdb, tolerance)
+        rsp, res = _get_match(sp, selected, tolerance,
+                              mz_power, intensity_power, shift)
+        if (type(rsp) == Spectrum):
+            if (type(res) == np.ndarray):
+                res = float(res['score'])
+            else:
+                res = res[0]
+            RES[i] = MatchedSpectra(i, get_correct_inchi(rsp), res)
+        else:
+            RES[i] = MatchedSpectra(i, rsp, res)
+    return RES
