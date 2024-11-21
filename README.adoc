@@ -14,7 +14,7 @@ image::https://github.com/MejriY/Decide_test/raw/master/image/gnps_iterative.png
 You can install **MS2DECIDE** using either `pip` (recommended for most users) or `conda`. Follow the instructions below based on your preferred method:
 
 **Ensure Python is installed**  
-   Before proceeding, make sure Python (version 3.7 or higher) is installed on your system. You can download it from https://www.python.org/downloads/.
+   Before proceeding, make sure Python (version 3.8 or higher) is installed on your system. You can download it from https://www.python.org/downloads/.
 
    - On Windows: Install Python and check the box to add it to your system's PATH.
 
@@ -27,24 +27,27 @@ python3 --version
 
 Alternatively, you can use **Conda**, which includes Python. Download and install Conda from https://docs.conda.io/projects/conda/en/stable/.
 
+**Open the Terminal**
+Once you have installed Conda, open your terminal. On Windows, you can use the Anaconda Prompt, while on macOS and Linux, you can use the standard terminal.
+
 **Set up a virtual environment**  
-   Create an isolated environment using either `venv` or `conda`.
-
-**Using venv (pip):**
+   Create an isolated environment using `conda`.
 
 [source,console]
 ----
-python3 -m venv ms2decide_env
-source ms2decide_env/bin/activate  // On Windows: ms2decide_env\Scripts\activate
+conda create --name ms2decide_env python=3.8
 ----
 
-**Using Conda:**
-
+During the process, you will see a message like this:
 [source,console]
 ----
-conda create --name ms2decide_env python=3.7
-conda activate ms2decide_env
+The following NEW packages will be INSTALLED:
+...
+...
+Proceed ([y]/n)?
 ----
+
+Make sure to type y (or press Enter) to proceed with the installation.
 
 **Install the library**  
    You can install it using `pip` by replacing `MS2DECIDE_Folder` with the actual path to the folder:
