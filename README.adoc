@@ -14,7 +14,7 @@ image::https://github.com/MejriY/Decide_test/raw/master/image/gnps_iterative.png
 You can install **MS2DECIDE** using either `pip` (recommended for most users) or `conda`. Follow the instructions below based on your preferred method:
 
 **Ensure Python is installed**  
-   Before proceeding, make sure Python (version 3.8 or higher) is installed on your system. Make sure to type y (or press Enter) to proceed with the installationAlternatively, you can use **Conda**, which includes Python. Download and install Conda from https://docs.conda.io/projects/conda/en/stable/.
+   Before proceeding, make sure Python (version 3.8 or higher) is installed on your system. Alternatively, you can use **Conda**, which includes Python. Download and install Conda from https://docs.conda.io/projects/conda/en/stable/.
 
 **Open the Terminal**
 Once you have installed Conda, open your terminal. On Windows, you can use the Anaconda Prompt, while on macOS and Linux, you can use the standard terminal.
