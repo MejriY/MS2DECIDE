@@ -50,6 +50,7 @@ pip install 'MS2DECIDE_Folder'.
 
 [source,console]
 ----
+conda install anaconda::git
 pip install git+https://github.com/MejriY/MS2DECIDE.git
 ----
 
