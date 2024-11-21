@@ -24,7 +24,7 @@ Once you have installed Conda, open your terminal. On Windows, you can use the A
 
 [source,console]
 ----
-conda create --name ms2decide_env python=3.8
+conda create --name ms2decide_env python=3.12
 ----
 
 During the process, you will see a message like this:
