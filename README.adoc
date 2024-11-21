@@ -80,5 +80,9 @@ Sirius annotations were performed in batch mode by using Sirius 6. we utilized t
 === ISDB-LOTUS
 For ISDB-LOTUS, since a strict library search was applied (0.02 Da), we considered a zero answer as an important information regarding our definition of novelty. Hence, no mean value was associated.
 
+## License
+
+`ms2decide` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
+
 
 
