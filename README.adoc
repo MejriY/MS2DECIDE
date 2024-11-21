@@ -65,7 +65,7 @@ python -c "import ms2decide; print('MS2DECIDE installed successfully!')"
 == How do we face tools inability to annotate
 
 === GNPS
-In scenarios where there is no match with GNPS or no match with Sirius, the tanimoto between GNPS and Sirius cannot be calculated. Hence, a default value of 0.25 was assigned to $T_{gs}$ in these instances.
+In scenarios where there is no match with GNPS or no match with Sirius, the tanimoto between GNPS and Sirius cannot be calculated. Hence, a default value of 0.7 was assigned to $T_{gs}$ and $T_{gi}$ in these instances.
 
 === Sirius
 Sirius annotations were performed in batch mode by using Sirius 6. we utilized the Confidence Approximate score. Unfortunately, in some cases, Sirius was not able to propose an annotation. To remedy, we associated a value of 0.5 to Sirius matching score.
