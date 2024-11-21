@@ -36,7 +36,7 @@ The following NEW packages will be INSTALLED:
 Proceed ([y]/n)?
 ----
 
-Make sure to type y (or press Enter) to proceed with the installation.
+Make sure to type **y** (or press Enter) to proceed with the installation.
 
 **Install the library**  
    You can install it using `pip` by replacing `MS2DECIDE_Folder` with the actual path to the folder:
