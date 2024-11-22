@@ -43,7 +43,7 @@ class Tanimotos():
         """
         d = {i: 0 for i in dict_annotations}
         for i in d:
-            # TODO Je ne comprends pas ce code, mais il faut éviter de coder des absences de valeur par le string 'nan' (bien qu'au fromage, ce soit bon).
+            
             # TODO the values '#' represent miss match in isdb
             if(dict_annotations[i] in ['#','?','*']):
                 d[i] = dict_annotations[i]
