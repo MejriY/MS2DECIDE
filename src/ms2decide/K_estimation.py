@@ -13,9 +13,9 @@ from pathlib import Path
 
 def K_estimation():
     """
-    Estimate K values for compounds based on GNPS, ISDB, and Sirius annotations.
+    Estimate K values for features prioritization based on MS/MS-based GNPS, ISDB-LOTUS, and Sirius annotations.
 
-    This function prompts the user for various input file paths, including an authentication file,
+    This function prompts the user for various input file paths, including an authentication information,
     quantitative data, MGF data, and the results of a Sirius job. It then retrieves and processes
     annotation data from multiple sources and compiles the results into a dataframe filtered by specific
     precursor mass criteria.
@@ -35,15 +35,15 @@ def K_estimation():
     path_file_mgf_in_gnps, path_file_quan_in_gnps = _upload_to_gnps(
         auth, Path(mgf_path), Path(quan_path), job_description)
     reaserach_type = input(
-        "PLEASE SPECIFY THE TYPE OF GNPS RESEARCH YOU WOULD LIKE TO APPLY. \n strict: for mass difference of 0.02 Da. \n iterative: for Weighted iterative GNPS analog search. \n")
+        "PLEASE SPECIFY THE TYPE OF GNPS LIBRARY SEARCH THAT YOU WOULD LIKE TO APPLY. \n strict: for mass difference of 0.02 Da. \n iterative: for Weighted iterative GNPS analog search. \n")
     if (reaserach_type.lower() == 'iterative'):
         dict_task_id = _launch_GNPS_workflow_iterative(
             auth, path_file_mgf_in_gnps, path_file_quan_in_gnps, job_description)
         fald_job = input(
-            "DO YOU WANT TO SAVE THE JOBS OF ITERATIVE GNPS? (yes or no)")
+            "DO YOU WANT TO SAVE ITERATIVE GNPS JOBS? (yes or no)")
         if(fald_job.lower()=='yes'):
             save_path_job = input(
-                'SELECT THE SAVE PATH FOR THE .txt FILE OF ITERATIVE GNPS JOS. \n This path need to terminate with a *.txt at the end')
+                'SELECT THE SAVE PATH FOR THE .txt FILE OF ITERATIVE GNPS JOBS. \n This path needs to terminate with a *.txt at the end')
             f = open(save_path_job,"w")
             f.write( str(dict_task_id) )
             f.close()
@@ -93,9 +93,9 @@ def K_estimation():
     dfw = dfw.sort_values(by=['K'])
     dfw['ranking by k'] = [i+1 for i in range(len(dfw))]
     save_path = input(
-        'SELECT THE SAVE PATH FOR THE .TSV FILE OF MS2DECIDE. \n This path need to terminate with a *.tsv at the end')
+        'SELECT THE SAVE PATH FOR THE .TSV FILE OF MS2DECIDE. \n This path needs to terminate with a *.tsv at the end')
     dfw.to_csv(save_path, sep='\t', index=False)
-    print('YOU CAN ANALYZE THE RANKING BY K BY MAPPING IT ONTO YOUR VISUALIZATION SOFTWARE.')
+    print('YOU CAN ANALYZE THE RANKING BY K BY MAPPING IT USING YOUR GRAPH SOFTWARE.')
     if (reaserach_type.lower() == 'iterative'):
         get_empty = input('GET EMPTY ANNOTATION MSLIB ID (yes or no): ')
         if (get_empty == 'yes'):
