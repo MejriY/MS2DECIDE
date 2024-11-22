@@ -28,8 +28,8 @@ def gnps_empty_repport(plateforme, dict_task_id, df,save_path):
     taken = set()
     for ID in list(x):
         # print(ID)
-        for peak in [6, 5, 4]:
-            for mass in [0.02, 0.1, 10, 25, 50, 100, 250, 500, 1000]:
+        for peak in dict_task_id:
+            for mass in dict_task_id[peak]:
                 t = res[peak][mass]
                 l = t[t['#Scan#'] == ID].values.tolist()
                 if (len(l) != 0) and (ID not in taken):
