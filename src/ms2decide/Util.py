@@ -117,7 +117,7 @@ def tanimoto(inc1, inc2):
     Returns:
         float: Tanimoto similarity score.
     """
-    if (inc1 == '?') or (inc2 == '?'):
+    if (inc1 in ['#','?','*']) or (inc2 in ['#','?','*']):
         return (0)
     else:
         mol1 = Chem.MolFromInchi(inc1)

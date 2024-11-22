@@ -45,8 +45,8 @@ class Tanimotos():
         for i in d:
             # TODO Je ne comprends pas ce code, mais il faut éviter de coder des absences de valeur par le string 'nan' (bien qu'au fromage, ce soit bon).
             # TODO the values '#' represent miss match in isdb
-            if(dict_annotations[i] == '#') or (dict_annotations[i] == '?') or (dict_annotations[i] == '*'):
-                d[i] = '?'
+            if(dict_annotations[i] in ['#','?','*']):
+                d[i] = dict_annotations[i]
             elif(str(dict_annotations[i]) != 'nan'):
                 try:
                     mol = Chem.MolFromInchi(dict_annotations[i])

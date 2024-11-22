@@ -1,17 +1,13 @@
 from .MgfInstance import MgfInstance
-from .AuthMail import AuthMail
-from .ClosestGNPS import _launch_GNPS_workflow_iterative, _upload_to_gnps, closest_gnps_ietrative_by_id, _wait_for_workflow_finish, _launch_GNPS_workflow, closest_gnps_by_id
+from .ClosestGNPS import closest_gnps_ietrative_by_id, closest_gnps_by_id
 from .IsdbAnnotation import get_cfm_annotation
 from .SiriusAnnotation import SiriusAnnotation
 from .gnps_empty_repport import gnps_empty_repport
 from .MultipleSourceAnnotation import MultipleSourceAnnotation, MultipleSourceAnnotation_to_dataframe
-import time
-import json
-import getpass
 from pathlib import Path
 
 
-def K_estimation():
+def K_estimation_by_id():
     """
     Estimate K values for compounds based on GNPS, ISDB, and Sirius annotations.
 
@@ -23,33 +19,20 @@ def K_estimation():
     Returns:
         DataFrame: A dataframe containing the filtered results based on K estimation.
     """
-    username = input('GNPS username: ')
-    password = getpass.getpass("GNPS password: ")
-    mail = input('GNPS mail: ')
-    auth = AuthMail(username, password, mail)
-
-    quan_path = input('SELECT THE PATH FOR YOUR QUANTITATIVE FILE \n :')
     mgf_path = input('SELECT THE PATH FOR YOU MGF FILE \n :')
     mgf = MgfInstance(Path(mgf_path))
-    job_description = input('INPUT THE TITLE FOR YOUR FBMN GNPS JOB \n :')
-    path_file_mgf_in_gnps, path_file_quan_in_gnps = _upload_to_gnps(
-        auth, Path(mgf_path), Path(quan_path), job_description)
+
     reaserach_type = input(
         "PLEASE SPECIFY THE TYPE OF GNPS RESEARCH YOU WOULD LIKE TO APPLY. \n strict: for mass difference of 0.02 Da. \n iterative: for Weighted iterative GNPS analog search. \n")
     if (reaserach_type.lower() == 'iterative'):
-        dict_task_id = _launch_GNPS_workflow_iterative(
-            auth, path_file_mgf_in_gnps, path_file_quan_in_gnps, job_description)
-        fald_job = input(
-            "DO YOU WANT TO SAVE THE JOBS OF ITERATIVE GNPS? (yes or no)")
-        if(fald_job.lower()=='yes'):
-            save_path_job = input(
-                'SELECT THE SAVE PATH FOR THE .txt FILE OF ITERATIVE GNPS JOS. \n This path need to terminate with a *.txt at the end')
-            f = open(save_path_job,"w")
-            f.write( str(dict_task_id) )
-            f.close()
+        dict_task_id_path = input(
+            'SELECT THE PATH FOR YOUR *.txt FILE THAT ITERATIVE GNPS JOBS')
+        dict_task_id = eval(open(dict_task_id_path, 'r').read())
+        gnps_res = closest_gnps_ietrative_by_id(dict_task_id, mgf_path)
     else:
-        task_id = _launch_GNPS_workflow(auth, path_file_mgf_in_gnps,
-                                        path_file_quan_in_gnps, job_description)
+        job_id = input(
+            'PLEASE WRITE THE TASK JOB IN GNPS')
+        gnps_res = closest_gnps_by_id(job_id, mgf_path)
 
     ISDBtol = float(
         input('SELECT MASS TOLERANCE FOR ISDB-LOTUS ANNOTATION (LESS THAN 0.5, DEFAULT 0.02 '))
@@ -62,23 +45,6 @@ def K_estimation():
         'SELECT THE PATH FOR YOUR SIRIUS6 ANNOTATION FILE (structure_identifications.tsv) \n :')
     indexScore = input('Select index score =  exact, approximate: ')
     sirius_res = SiriusAnnotation(sirius_path, mgf, indexScore)
-
-    if (reaserach_type.lower() == 'iterative'):
-        state = _wait_for_workflow_finish(dict_task_id)
-        while (state != {'DONE'}):
-            if ('FAILED' in state):
-                raise Exception('FAILED in GNPS Job')
-            time.sleep(100)
-            state = _wait_for_workflow_finish(dict_task_id)
-        gnps_res = closest_gnps_ietrative_by_id(dict_task_id, mgf_path)
-    else:
-        state = _wait_for_workflow_finish({6: {0.02: task_id}})
-        while (state != {'DONE'}):
-            if ('FAILED' in state):
-                raise Exception('FAILED in GNPS Job')
-            time.sleep(100)
-            state = _wait_for_workflow_finish({6: {0.02: task_id}})
-        gnps_res = closest_gnps_by_id(task_id, mgf_path)
 
     get_gnps, get_sirius, get_isdb = True, True, True
     results = {}
@@ -102,5 +68,4 @@ def K_estimation():
             save_path_empty = Path(save_path).parent.joinpath('empty.tsv')
             gnps_empty_repport('GNPS', dict_task_id, dfw, save_path_empty)
             print('EMPTY ANNOTATION ARE SAVED IN THE SAME DIRECTERY AS K RANKING')
-
     return (dfw)
