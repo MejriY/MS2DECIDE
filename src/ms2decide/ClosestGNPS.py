@@ -196,6 +196,7 @@ def _launch_GNPS_workflow(auth, path_file_mgf_in_gnps, path_file_quan_in_gnps, j
     invokeParameters = {}
     invokeParameters = _get_networking_parameters()
     invokeParameters["desc"] = job_description
+    invokeParameters["MAX_SHIFT_MASS"] = str(0.02)
     invokeParameters["quantification_table"] = "d./" + \
         auth.username + path_file_quan_in_gnps
     invokeParameters["spec_on_server"] = "d./" + \
