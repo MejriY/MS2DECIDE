@@ -43,7 +43,7 @@ class SiriusAnnotation():
         for ID in mgf_instance.data:
             if (ID in data_sirius):
                 try:
-                    sc = data_sirius[ID][indexScore]
+                    sc = float(data_sirius[ID][indexScore])
                 except:
                     sc = 0
                 data[ID] = MatchedSpectra(
