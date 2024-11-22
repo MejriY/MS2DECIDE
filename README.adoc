@@ -1,15 +1,16 @@
 = MS2DECIDE
 
-image::https://github.com/MejriY/Decide_test/raw/master/image/ms2decide_logo.png[]
-
+image::https://github.com/MejriY/MS2DECIDE_pic/raw/main/image/ms2decide_logo.png[]
+       
 MS2DECIDE is a Python library that leverages decision theory to assist chemists in natural products annotation and targeting. By gathering insights from domain experts and modeling their intuition, the library offers a structured, data-driven approach to interpreting multiannotated tandem mass spectrometry data. MS2DECIDE integrates GNPS (enhanced with a weighted iterative analog search), ISDB-LOTUS and Sirius6 annotations to deliver reliable recommendation even in uncertain scenarios. This library bridges expert knowledge and computational efficiency, simplifying complex workflows and enabling chemists to make informed, confident decisions in metabolite research.
-image::https://github.com/MejriY/Decide_test/raw/master/image/all_article_workflow.png[]
+image::https://github.com/MejriY/MS2DECIDE_pic/raw/main/image/all_article_workflow.png
 
+       
 == The logic behind the tool
-image::https://github.com/MejriY/Decide_test/raw/master/image/who%20it%20work.png[]
+image::https://github.com/MejriY/MS2DECIDE_pic/blob/main/image/who%20it%20work.png[]
        
 === Weighted iterative GNPS analog search (WIGAS)
-image::https://github.com/MejriY/Decide_test/raw/master/image/gnps_iterative.png[]
+image::https://github.com/MejriY/MS2DECIDE_pic/raw/main/image/gnps_iterative.png[]
 == Installation
 You can install **MS2DECIDE** using either `pip` (recommended for most users) or `conda`. Follow the instructions below based on your preferred method:
 
@@ -38,13 +39,6 @@ Proceed ([y]/n)?
 
 Make sure to type **y** (or press Enter) to proceed with the installation.
 
-
-**Activate this environment**  
-To activate this environment, use
-[source,console]
-----
-conda activate ms2decide_env
-----
 **Install the library**  
    You can install it using `pip` by replacing `MS2DECIDE_Folder` with the actual path to the folder:
 

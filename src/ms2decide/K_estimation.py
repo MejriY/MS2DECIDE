@@ -82,18 +82,16 @@ def K_estimation():
     # taken = [i for i in taken if len(mgf.data[i].peaks.mz) > 3]
     # dfw_taken = dfw[dfw.ID.isin(taken)]
     dfw = dfw.sort_values(by=['K'])
-    dfw['ranking by k']=[i+1 for i in range(len(dfw))]
+    dfw['ranking by k'] = [i+1 for i in range(len(dfw))]
     save_path = input(
         'SELECT THE SAVE PATH FOR THE .TSV FILE OF MS2DECIDE. \n This path need to terminate with a *.tsv at the end')
     dfw.to_csv(save_path, sep='\t', index=False)
-
-    get_empty = input('GET EMPTY ANNOTATION MSLIB ID (yes or no): ')
-    if (get_empty == 'yes'):
-        save_path_empty = Path(save_path).parent.joinpath('empty.tsv')
-        if (reaserach_type.lower() == 'iterative'):
+    print('YOU CAN ANALYZE THE RANKING BY K BY MAPPING IT ONTO YOUR VISUALIZATION SOFTWARE.')
+    if (reaserach_type.lower() == 'iterative'):
+        get_empty = input('GET EMPTY ANNOTATION MSLIB ID (yes or no): ')
+        if (get_empty == 'yes'):
+            save_path_empty = Path(save_path).parent.joinpath('empty.tsv')
             gnps_empty_repport('GNPS', dict_task_id, dfw, save_path_empty)
-        else:
-            gnps_empty_repport(
-                'GNPS', {6: {0.02: task_id}}, dfw, save_path_empty)
+            print('EMPTY ANNOTATION ARE SAVED IN THE SAME DIRECTERY AS K RANKING')
 
     return (dfw)
