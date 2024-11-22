@@ -45,10 +45,13 @@ def get_cfm_annotation(mgf_instance, tol=0.02):
     Returns:
         dict: A dictionary where the key is the spectrum ID and the value is a MatchedSpectra object with ISDB-Lotus annotation.
     """
-    return (_get_cfm_annotation(mgf_instance, tol=tol))
+    ion_mode = float(
+        input('SELECT ION MODE FOR ISDB-LOTUS ANNOTATION (POS for positive and NEG for negative'))
+    ion_mode = ion_mode.lower()
+    return (_get_cfm_annotation(mgf_instance, ion_mode, tol=tol))
 
 
-def _get_cfm_annotation(mgf, ion_mode='pos', tol=0.02):
+def _get_cfm_annotation(mgf, ion_mode, tol=0.02):
     """
     Internal function to get ISDB-Lotus annotations for the given MGF instance.
 
