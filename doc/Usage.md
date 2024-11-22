@@ -1,6 +1,6 @@
 ## Usage Guide: `K_estimation`
 
-The `K_estimation` function is a core feature of the library designed to estimate \( K \)-values for compounds based on annotations from GNPS, ISDB, and Sirius. Below is a detailed explanation of how to use this function.
+The `K_estimation` function is a core feature of `ms2decide`, designed to aggregate annotations from multannotation tools as GNPS, ISDB-LOTUS, and Sirius—by leveraging decision theory. This approach models expert preference elicitation to derive \( K \)-values for compounds, providing a unified and informed annotation estimate.
 
 ---
 
@@ -77,7 +77,7 @@ The function returns a (`tsv file`)containing the **processed** and **ranked** r
 Below is an example of how to call the `K_estimation` function in Python and interact with its prompts:
 
 ```python
-from your_library import K_estimation
+from ms2decide.K_estimation import K_estimation
 
 # Run the function to estimate K values
 df = K_estimation()
