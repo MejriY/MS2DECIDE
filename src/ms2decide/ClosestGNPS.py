@@ -6,6 +6,7 @@ from matchms import Spectrum
 import urllib.request
 import json
 import requests
+import chardet
 import sys
 import pandas as pd
 from pathlib import Path
@@ -257,13 +258,25 @@ def _gnps_annotations_download_results(task_id):
     gnps_download_link = 'https://gnps.ucsd.edu/ProteoSAFe/result_json.jsp?task={}&view=view_all_annotations_DB'
     # Launch the download
     with urllib.request.urlopen(gnps_download_link.format(task_id)) as url:
-        data = json.load(url)
-    df_annotations = pd.DataFrame.from_dict(data['blockData'])
-    print('==================')
-    print(' FBMN job detected with ' +
-          str(df_annotations.shape[0]-1) + ' spectral library annotations in the job:' + task_id)
-    print('==================')
-    return (df_annotations)
+        raw_data = url.read()  # Read the binary data
+        # Detect encoding
+        detected_encoding = chardet.detect(raw_data)
+        decoded_data = raw_data.decode(
+            detected_encoding['encoding'], errors='replace')
+    # Parse the string as JSON
+    try:
+        # Convert the decoded string to a Python dictionary
+        data = json.loads(decoded_data)
+        print("JSON Loaded Successfully")
+        df_annotations = pd.DataFrame.from_dict(data['blockData'])
+        print('==================')
+        print(' FBMN job detected with ' +
+              str(df_annotations.shape[0]-1) + ' spectral library annotations in the job:' + task_id)
+        print('==================')
+        return (df_annotations)
+    except json.JSONDecodeError as e:
+        print(f"JSON Decode Error: {e}")
+        raise Exception('CAN NOT GET THE DATA FROM THE JOB: ' + task_id)
 
 
 def _wait_for_workflow_finish(dict_task_id):

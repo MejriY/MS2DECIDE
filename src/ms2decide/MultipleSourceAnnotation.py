@@ -142,8 +142,8 @@ def MultipleSourceAnnotation_to_dataframe(mgf_instance, get_gnps, get_sirius, ge
             tsi+=0.25
             score_sirius=0.5
         if(inchi_gnps=='*'):
-            tgs+=0.25
-            tgi+=0.25
+            tgs+=0.7
+            tgi+=0.7
         l = [ID, inchi_gnps, score_gnps, inchi_sirius,
              score_sirius, inchi_isdb, score_isdb, tgs, tgi, tsi]
         for estimator in results:
