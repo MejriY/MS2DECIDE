@@ -37,6 +37,8 @@ Proceed ([y]/n)?
 ----
 
 Make sure to type **y** (or press Enter) to proceed with the installation.
+
+
 **Activate this environment**  
 To activate this environment, use
 [source,console]
