@@ -37,7 +37,12 @@ Proceed ([y]/n)?
 ----
 
 Make sure to type **y** (or press Enter) to proceed with the installation.
-
+**Activate this environment**  
+To activate this environment, use
+[source,console]
+----
+conda activate ms2decide_env
+----
 **Install the library**  
    You can install it using `pip` by replacing `MS2DECIDE_Folder` with the actual path to the folder:
 
