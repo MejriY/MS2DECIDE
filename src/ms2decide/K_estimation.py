@@ -101,6 +101,6 @@ def K_estimation():
         if (get_empty == 'yes'):
             save_path_empty = Path(save_path).parent.joinpath('empty.tsv')
             gnps_empty_repport('GNPS', dict_task_id, dfw, save_path_empty)
-            print('EMPTY ANNOTATION ARE SAVED IN THE SAME DIRECTERY AS K RANKING')
+            print('EMPTY ANNOTATION FILE IS SAVED IN THE SAME DIRECTORY AS K RANKING')
 
     return (dfw)
