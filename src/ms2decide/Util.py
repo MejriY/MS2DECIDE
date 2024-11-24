@@ -61,12 +61,12 @@ def _check_file_and_download(tool):
         Path: The path to the downloaded file.
     """
     isdb_path = input(
-        'SELECT DIRECTORY OF ISDB-LOTUS DATA \n IF THE MGF FILE IS NOT THERE, THE LIBRARY WILL BE DOWNLOADED : \n')
+        'SELECT DIRECTORY OF ISDB-LOTUS DATA \n IF THE MGF FILE IS NOT THERE, THE LIBRARY WILL BE DOWNLOADED. This path needs to terminate with a \ at the end \n')
     # if (isdb_path[-2:] != "\\"):
     #     isdb_path += '\\'
 
     if (tool+'.mgf' in os.listdir(isdb_path)):
-        print('==========> FILE ALREADY IN DIRECTORY')
+        print('==========> FILE ALREADY IN DIRECTORY, PLEASE WAIT FOR LOADING THE LIBRARY')
         s = Path(isdb_path+tool+'.mgf')
     else:
         print('==========> DIRECTORY EXISTS WITHOUT FILES')
