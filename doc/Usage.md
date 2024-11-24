@@ -15,31 +15,30 @@ The `K_estimation` function:
 
 ### **How to Use `K_estimation`**
 
-1. **Input Credentials**
-   - The function will prompt you to provide your GNPS username, password, and email. This is necessary for authenticating with the GNPS platform.
+1. **Input credentials**
+   - The function will prompt you to provide your GNPS username, password, and email. This is necessary for authenticating on the GNPS platform.
 
 2. **Provide Input Files**
    - Specify the paths to the following required files:
      - **Quantitative Table File**: A `.csv` file containing the quantitative data for your analysis. Ensure the file format is correct to avoid errors.
-     - **MGF File**: A file containing mass spectrometry data in MGF format.
+     - **MGF File**: A file containing tandem mass spectrometry data in MGF format.
  
    
    - Example paths:
      ```plaintext
-     SELECT THE PATH FOR YOUR QUANTITATIVE FILE 
+     SELECT THE PATH FOR YOUR QUANTITATIVE FILE. This path needs to terminate with a *.csv at the end 
      : /path/to/quantitative_file.csv
 
-     SELECT THE PATH FOR YOUR MGF FILE 
+     SELECT THE PATH FOR YOUR MGF FILE.  This path needs to terminate with a *.mgf at the end 
      : /path/to/mgf_file.mgf
      ```
 
 3. **Set Up GNPS Workflow**
    - **FBMN Title:** Provide a unique and descriptive title for your FBMN job. **Note**: A folder with this title will be created to upload the quantitative data and MGF files. Ensure the title you choose does not match the name of an existing folder.
-   - Choose the GNPS job title and the type of library search:
+   - Choose the type of GNPS library search:
      - `strict`: Uses a typical mass difference tolerance of 0.02 Da. For more precise information, we recommend visiting the [GNPS Documentation on Library Search](https://ccms-ucsd.github.io/GNPSDocumentation/librarysearch/). **Note**: This workflow uses a library score threshold of `0.001`.
-     - `iterative`: Utilizes the weighted iterative GNPS analog search.
-
-At this level, 27 FBMN jobs will be created on your GNPS account. In the case of `strict`
+     - `iterative`: for iterative weighted analog search (can take up to three hours).
+At this level, 27 FBMN jobs will be launched on your GNPS account. In the case of `strict`, only one job will be launched.
 
 4. **ISDB-LOTUS Annotation**
    - The ISDB-LOTUS annotation is performed using the function `isdb_res = get_cfm_annotation(mgf, ISDBtol)`. During the process, the user will be prompted to provide:
@@ -48,7 +47,7 @@ At this level, 27 FBMN jobs will be created on your GNPS account. In the case of
    - This function calculates annotations by matching mass spectrometry data against ISDB-LOTUS spectral data.
 
 5. **Sirius Annotation**
-   - Provide the path to the Sirius annotation file (`structure_identifications.tsv`).
+   - Provide the path to the Sirius6 annotation file (`structure_identifications.tsv`).
    - Select the confidence score type:
      - `exact`
      - `approximate`
@@ -60,11 +59,11 @@ At this level, 27 FBMN jobs will be created on your GNPS account. In the case of
 7. **Export Results**
    - Specify the path to save the output `.tsv` file:
      ```plaintext
-     SELECT THE SAVE PATH FOR THE .TSV FILE OF MS2DECIDE. 
+     SELECT THE SAVE PATH FOR THE .TSV FILE OF MS2DECIDE OUTPUT. 
      #This path needs to terminate with a file_name.tsv where `file_name` is the desired name specified by the user.
      ```
 
-8. **Optional: Retrieve Empty Annotations in the case of weighted iterative GNPS analog search**
+8. **Optional: Retrieve Empty Annotations in the case of iterative weighted GNPS analog search**
    - If requested (`yes`), the function generates a report of empty annotations and saves it as `empty.tsv`.
 
 ---
