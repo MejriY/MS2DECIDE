@@ -1,3 +1,0 @@
-rank	molecularFormula	adduct	precursorFormula	ZodiacScore	SiriusScore	TreeScore	IsotopeScore	numExplainedPeaks	explainedIntensity	medianMassErrorFragmentPeaks(ppm)	medianAbsoluteMassErrorFragmentPeaks(ppm)	massErrorPrecursor(ppm)	lipidClass	ionMass	retentionTimeInSeconds	id
-1	C17H26N2O2	[M + Na]+	C17H26N2O2	0.9999999999999999	71.35546256790379	71.35546256790379	0.0	35	0.7373495923026148	2.7702080790301915	3.8068717454078573	7.5073291041489725		313.19100	NaN	1_mia double - Copie_10-hydroxygeissoschizolMH
-2	C25H34N6O3	[M + H]+	C25H34N6O3	0.0	90.2436731082274	90.2436731082274	0.0	43	0.8241511609497929	-3.8746101084214883	4.754321478857892	7.457198916033496		467.28000	NaN	2_mia double - Copie_10-hydroxyusambarineMH

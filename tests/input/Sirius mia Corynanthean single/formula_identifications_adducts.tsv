@@ -1,2 +1,0 @@
-rank	molecularFormula	adduct	precursorFormula	SiriusScore	TreeScore	IsotopeScore	numExplainedPeaks	explainedIntensity	medianMassErrorFragmentPeaks(ppm)	medianAbsoluteMassErrorFragmentPeaks(ppm)	massErrorPrecursor(ppm)	lipidClass	ionMass	retentionTimeInSeconds	id
-1	C17H26N2O2	[M + Na]+	C17H26N2O2	71.35546256790379	71.35546256790379	0.0	35	0.7373495923026148	2.7702080790301915	3.8068717454078573	7.5073291041489725		313.19100	NaN	1_mia Corynanthean single_10-hydroxygeissoschizolMH
