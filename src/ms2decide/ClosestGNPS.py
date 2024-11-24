@@ -274,6 +274,7 @@ def _gnps_annotations_download_results(task_id):
         print(' FBMN job detected with ' +
               str(df_annotations.shape[0]-1) + ' spectral library annotations in the job:' + task_id)
         print('==================')
+        df_annotations[['#Scan#', 'MQScore']] = df_annotations[['#Scan#', 'MQScore']].apply(pd.to_numeric)
         return (df_annotations)
     except json.JSONDecodeError as e:
         print(f"JSON Decode Error: {e}")
@@ -313,6 +314,7 @@ def closest_gnps(auth, input_file_mgf, input_file_quan):
     df_anno = _gnps_annotations_download_results(task_id)
     df_anno = df_anno.rename(columns=str.lower)
     dic_anno = df_anno.set_index("#scan#").to_dict('index')
+    dic_anno = {int(i):dic_anno[i] for i in dic_anno}
     matched_spectra_dict = {}
     for ID in dict_data:
         if (ID in dic_anno):
@@ -387,6 +389,7 @@ def closest_gnps_by_id(job_id, mgf_path):
     df_anno = _gnps_annotations_download_results(job_id)
     df_anno = df_anno.rename(columns=str.lower)
     dic_anno = df_anno.set_index("#scan#").to_dict('index')
+    dic_anno = {int(i):dic_anno[i] for i in dic_anno}
     mgf_instance = MgfInstance(Path(mgf_path))
     dict_data = mgf_instance.data
     matched_spectra_dict = {}
