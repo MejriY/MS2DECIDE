@@ -2,7 +2,7 @@
 
 image::https://github.com/MejriY/MS2DECIDE_pic/raw/main/image/ms2decide_logo.png[]
        
-MS2DECIDE is a Python library that leverages decision theory to assist chemists in natural products annotation and targeting. By gathering insights from domain experts and modeling their intuition, the library offers a structured, data-driven approach to interpreting multiannotated tandem mass spectrometry data. MS2DECIDE integrates GNPS (enhanced with a weighted iterative analog search), ISDB-LOTUS and Sirius6 annotations to deliver reliable recommendation even in uncertain scenarios. This library bridges expert knowledge and computational efficiency, simplifying complex workflows and enabling chemists to make informed, confident decisions in metabolite research.
+MS2DECIDE is a Python library that leverages decision theory to assist chemists in natural products multiannotation and prioritization. By gathering insights from domain experts and modeling their intuition, the library offers a structured, data-driven approach to interpreting multiannotated tandem mass spectrometry data. MS2DECIDE integrates GNPS (enhanced with a weighted iterative analog search), ISDB-LOTUS and Sirius6 annotations to deliver reliable recommendation even in uncertain scenarios. This library bridges expert knowledge and computational efficiency, simplifying complex workflows and enabling chemists to make informed, confident decisions in metabolite research.
 image::https://github.com/MejriY/MS2DECIDE_pic/raw/main/image/all_article_workflow.png
 
        
