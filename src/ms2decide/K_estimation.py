@@ -28,14 +28,14 @@ def K_estimation():
     mail = input('GNPS mail: ')
     auth = AuthMail(username, password, mail)
 
-    quan_path = input('SELECT THE PATH FOR YOUR QUANTITATIVE FILE \n :')
-    mgf_path = input('SELECT THE PATH FOR YOU MGF FILE \n :')
+    quan_path = input('SELECT THE PATH FOR YOUR QUANTITATIVE FILE. This path needs to terminate with a *.csv at the end \n :')
+    mgf_path = input('SELECT THE PATH FOR YOU MGF FILE. This path needs to terminate with a *.mgf at the end \n :')
     mgf = MgfInstance(Path(mgf_path))
-    job_description = input('INPUT THE TITLE FOR YOUR FBMN GNPS JOB \n :')
+    job_description = input('INPUT A TITLE FOR YOUR FBMN GNPS JOB \n :')
     path_file_mgf_in_gnps, path_file_quan_in_gnps = _upload_to_gnps(
         auth, Path(mgf_path), Path(quan_path), job_description)
     reaserach_type = input(
-        "PLEASE SPECIFY THE TYPE OF GNPS LIBRARY SEARCH THAT YOU WOULD LIKE TO APPLY. \n strict: for mass difference of 0.02 Da. \n iterative: for Weighted iterative GNPS analog search. \n")
+        "PLEASE SPECIFY THE TYPE OF GNPS LIBRARY SEARCH THAT YOU WOULD LIKE TO APPLY. \n strict: for mass difference of 0.02 Da and six matched peaks with very low cosine threshold. \n iterative: for iterative weighted analog search (can take up to three hours). \n")
     if (reaserach_type.lower() == 'iterative'):
         dict_task_id = _launch_GNPS_workflow_iterative(
             auth, path_file_mgf_in_gnps, path_file_quan_in_gnps, job_description)
@@ -52,15 +52,15 @@ def K_estimation():
                                         path_file_quan_in_gnps, job_description)
 
     ISDBtol = float(
-        input('SELECT MASS TOLERANCE FOR ISDB-LOTUS ANNOTATION (LESS THAN 0.5, DEFAULT 0.02 '))
+        input('SELECT MASS TOLERANCE FOR ISDB-LOTUS ANNOTATION (LESS THAN 0.5, DEFAULT 0.02) '))
     while (ISDBtol > 0.5):
         ISDBtol = input(
-            'SELECT MASS TOLERANCE FOR ISDB-LOTUS ANNOTATION LESS THAN 0.5, DEFAULT 0.02 ')
+            'SELECT MASS TOLERANCE FOR ISDB-LOTUS ANNOTATION (LESS THAN 0.5, DEFAULT 0.02) ')
     isdb_res = get_cfm_annotation(mgf, ISDBtol)
 
     sirius_path = input(
-        'SELECT THE PATH FOR YOUR SIRIUS6 ANNOTATION FILE (structure_identifications.tsv) \n :')
-    indexScore = input('Select index score =  exact, approximate: ')
+        'SELECT THE PATH FOR YOUR SIRIUS6 ANNOTATION FILE. This path needs to terminate with structure_identifications.tsv at the end \n :')
+    indexScore = input('Select index score = exact, approximate: ')
     sirius_res = SiriusAnnotation(sirius_path, mgf, indexScore)
 
     if (reaserach_type.lower() == 'iterative'):
@@ -93,7 +93,7 @@ def K_estimation():
     dfw = dfw.sort_values(by=['K'])
     dfw['ranking by k'] = [i+1 for i in range(len(dfw))]
     save_path = input(
-        'SELECT THE SAVE PATH FOR THE .TSV FILE OF MS2DECIDE. \n This path needs to terminate with a *.tsv at the end')
+        'SELECT THE SAVE PATH FOR THE .TSV FILE OF MS2DECIDE OUPUT. \n This path needs to terminate with a *.tsv at the end')
     dfw.to_csv(save_path, sep='\t', index=False)
     print('YOU CAN ANALYZE THE RANKING BY K BY MAPPING IT USING YOUR GRAPH SOFTWARE.')
     if (reaserach_type.lower() == 'iterative'):
