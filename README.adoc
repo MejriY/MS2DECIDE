@@ -131,42 +131,70 @@ Specify the paths to the following required files:
      SELECT THE PATH FOR YOUR MGF FILE.  This path needs to terminate with a *.mgf at the end 
      : /path/to/mgf_file.mgf
      ```
-**Set Up GNPS Workflow**
+
+**Setup GNPS Workflow**
+
    - **FBMN Title:** Provide a unique and descriptive title for your FBMN job. 
+
 **Note**: A folder with this title will be created to upload the quantitative data and MGF files. Ensure the title you choose does not match the name of an existing folder.
-   - Choose the type of GNPS library search:
-     - `strict`: Uses a typical mass difference tolerance of 0.02 Da and threshold value of 0.001. For more precise information, we recommend visiting the [GNPS Documentation on Library Search](https://ccms-ucsd.github.io/GNPSDocumentation/librarysearch/). **Note**: Since, this workflow uses a library score threshold of `0.001` some failures can occur with the FBMN GNPS workflow. We recommend to increase the threshold value in the source coude (line 123 in the file ClosestGNPS.py) or to report the failure to the GNPS staff.
-     - `iterative`: for iterative weighted analog search (can take up to three hours).
-At this level, 27 FBMN jobs will be launched on your GNPS account. In the case of `strict`, only one job will be launched.
+  
+- Choose the type of GNPS library search:
+           - `strict`: Uses a typical mass difference tolerance of 0.02 Da and threshold value of 0.001. For more precise information, we recommend visiting the [GNPS Documentation on Library Search](https://ccms-ucsd.github.io/GNPSDocumentation/librarysearch/). 
+
+**Note**: Since, this workflow uses a library score threshold of `0.001` some failures can occur with the FBMN GNPS workflow. We recommend to increase the threshold value (for e.g., 0.1) in the MS2DECIDE source code (line 123 in the file ClosestGNPS.py) or to report the failure to the GNPS staff.
+     
+       - `iterative`: for iterative weighted analog search (can take up to three hours).
+
+**Note**: with iterative 27 FBMN jobs will be launched from your GNPS account. In the case of `strict`, only one job will be launched.
 
 
 image::https://github.com/MejriY/MS2DECIDE_pic/raw/main/image/gnps_iterative.png[]
 
+
 **ISDB-LOTUS Annotation**
-   - The ISDB-LOTUS annotation is performed using the function `isdb_res = get_cfm_annotation(mgf, ISDBtol)`. During the process, the user will be prompted to provide:
-     - **Ionization Mode**: Specify the ionization mode for annotation (`POS` for positive, `NEG` for negative).
-     - **Mass Tolerance**: Provide a mass tolerance value less than `0.5` (default: `0.02`). **Note**: This value is comprised between 0 and 0.5.
-   - This function calculates annotations by matching mass spectrometry data against ISDB-LOTUS spectral data accessible [here](https://zenodo.org/records/8287341)
+
+The ISDB-LOTUS annotation is performed using the function `isdb_res = get_cfm_annotation(mgf, ISDBtol)`. During the process, the user will be prompted to choose:
+    
+- **Ionization Mode**: Specify the ionization mode for annotation (`POS` for positive, `NEG` for negative).
+    
+- **Mass Tolerance**: Provide a mass tolerance value less than `0.5` (default: `0.02`). **Note**: This value is comprised between 0 and 0.5.
+   
+**Note**: This function calculates annotations by matching mass spectrometry data against ISDB-LOTUS spectral data accessible [here](https://zenodo.org/records/8287341)
 
 **Sirius Annotation**
-   - Provide the path to the Sirius 6 annotation file (`structure_identifications.tsv`).
-   - Select the confidence score type: (For more information on this choice, see the [SIRIUS documentation](https://v6.docs.sirius-ms.io/methods-background/#confidence-score-modes)
+
+- Provide the path to the Sirius 6 annotation file (`structure_identifications.tsv`)
+
+   ```plaintext
+     SELECT THE PATH FOR YOUR SIRIUS6 ANNOTATION FILE. 
+     #This path needs to terminate with structure_identifications.tsv at the end.
+     ```
+
+Select the confidence score type: 
+
      - `exact`
+
      - `approximate`
 
-**Compile Annotations**
-   - Annotations from GNPS, Sirius, and ISDB-LOTUS are compiled into a unified dataframe.
-   - The dataframe is filtered and sorted by \( K \)-values.
+**Note**: For more information on this choice, see the [SIRIUS documentation](https://v6.docs.sirius-ms.io/methods-background/#confidence-score-modes)
 
-**Export Results**
-   - Specify the path to save the output `.tsv` file:
+
+**Compile Annotations and export Results**
+
+- Annotations from GNPS, Sirius, and ISDB-LOTUS are compiled into a unified dataframe.
+
+- The dataframe is filtered and sorted by \( K \)-values.
+
+- Specify the path to save the output `.tsv` file:
+
      ```plaintext
      SELECT THE SAVE PATH FOR THE .TSV FILE OF MS2DECIDE OUTPUT. 
      #This path needs to terminate with a file_name.tsv where `file_name` is the desired name specified by the user.
      ```
 
 **Optional: Retrieve Empty Annotations in the case of iterative weighted GNPS analog search**
-   - If requested (`yes`), the function generates a report of empty annotations and saves it as `empty.tsv`. This could help to complete metadata of existing MS/MS spectra on the GNPS.
+
+- If requested (`yes`), the function generates a report of empty annotations and saves it as `empty.tsv`. This could help to complete missing InChIs or SMILES of existing MS/MS spectra on the GNPS.
 
 ---
 
