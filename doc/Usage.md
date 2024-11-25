@@ -40,6 +40,9 @@ The `K_estimation` function:
      - `iterative`: for iterative weighted analog search (can take up to three hours).
 At this level, 27 FBMN jobs will be launched on your GNPS account. In the case of `strict`, only one job will be launched.
 
+
+image::https://github.com/MejriY/MS2DECIDE_pic/raw/main/image/gnps_iterative.png[]
+
 4. **ISDB-LOTUS Annotation**
    - The ISDB-LOTUS annotation is performed using the function `isdb_res = get_cfm_annotation(mgf, ISDBtol)`. During the process, the user will be prompted to provide:
      - **Ionization Mode**: Specify the ionization mode for annotation (`POS` for positive, `NEG` for negative).
