@@ -65,7 +65,7 @@ pip install git+https://github.com/MejriY/MS2DECIDE.git
 
 **Verify the installation**  
    
-Check if the library is installed successfully:
+Check if the library was installed successfully:
 
 [source,console]
 ----
