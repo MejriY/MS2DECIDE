@@ -23,7 +23,7 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = ["scipy", "rdkit", "matchms", "pandas", "requests", "pytest", "responses"]
+dependencies = ["scipy", "rdkit", "matchms", "pandas", "requests", "pytest", "responses", "chardet"]
 
 [project.urls]
 Documentation = "https://github.com/unknown/ms2decide#readme"
