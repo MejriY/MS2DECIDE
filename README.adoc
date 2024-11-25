@@ -136,16 +136,16 @@ Specify the paths to the following required files:
 
    - **FBMN Title:** Provide a unique and descriptive title for your FBMN job. 
 
-**Note**: A folder with this title will be created to upload the quantitative data and MGF files. Ensure the title you choose does not match the name of an existing folder.
+**Notes**: A folder with this title will be created to upload the quantitative data and MGF files. Ensure the title you choose does not match the name of an existing folder.
   
 - Choose the type of GNPS library search:
            - `strict`: Uses a typical mass difference tolerance of 0.02 Da and threshold value of 0.001. For more precise information, we recommend visiting the [GNPS Documentation on Library Search](https://ccms-ucsd.github.io/GNPSDocumentation/librarysearch/). 
 
-**Note**: Since, this workflow uses a library score threshold of `0.001` some failures can occur with the FBMN GNPS workflow. We recommend to increase the threshold value (for e.g., 0.1) in the MS2DECIDE source code (line 123 in the file ClosestGNPS.py) or to report the failure to the GNPS staff.
+**Notes**: Since, this workflow uses a library score threshold of `0.001` some failures can occur with the FBMN GNPS workflow. We recommend to increase the threshold value (for e.g., 0.1) in the MS2DECIDE source code (line 123 in the file ClosestGNPS.py) or to report the failure to the GNPS staff.
      
        - `iterative`: for iterative weighted analog search (can take up to three hours).
 
-**Note**: with iterative 27 FBMN jobs will be launched from your GNPS account. In the case of `strict`, only one job will be launched.
+**Notes**: with iterative 27 FBMN jobs will be launched from your GNPS account. In the case of `strict`, only one job will be launched.
 
 
 image::https://github.com/MejriY/MS2DECIDE_pic/raw/main/image/gnps_iterative.png[]
@@ -159,7 +159,7 @@ The ISDB-LOTUS annotation is performed using the function `isdb_res = get_cfm_an
     
 - **Mass Tolerance**: Provide a mass tolerance value less than `0.5` (default: `0.02`). **Note**: This value is comprised between 0 and 0.5.
    
-**Note**: This function calculates annotations by matching mass spectrometry data against ISDB-LOTUS spectral data accessible [here](https://zenodo.org/records/8287341)
+**Notes**: This function calculates annotations by matching mass spectrometry data against ISDB-LOTUS spectral data accessible [here](https://zenodo.org/records/8287341) using spectral_lib_matcher, based on the MatchMS library
 
 **Sirius Annotation**
 
@@ -176,7 +176,7 @@ Select the confidence score type:
 
      - `approximate`
 
-**Note**: For more information on this choice, see the [SIRIUS documentation](https://v6.docs.sirius-ms.io/methods-background/#confidence-score-modes)
+**Notes**: For more information on this choice, see the [SIRIUS documentation](https://v6.docs.sirius-ms.io/methods-background/#confidence-score-modes)
 
 
 **Compile Annotations and export Results**
@@ -213,6 +213,44 @@ Sirius annotations were performed in batch mode by using Sirius 6. we utilized t
 
 === ISDB-LOTUS
 For ISDB-LOTUS, since a strict library search was applied (0.02 Da), we considered a zero answer as an important information regarding our definition of novelty. Hence, no mean value was associated.
+
+## Main Citations
+
+According to which steps you used, please give credit to the authors of
+the tools/resources used.
+
+
+### LOTUS
+
+General: <https://doi.org/10.7554/eLife.70780>
+
+⚠️ Do not forget to cite which version you used:
+<https://doi.org/10.5281/zenodo.5794106>
+
+### ISDB
+
+General: <https://doi.org/10.1021/acs.analchem.5b04804>
+
+⚠️ Do not forget to cite which version you used:
+<https://doi.org/10.5281/zenodo.5607185>
+
+### GNPS
+
+- General: <https://doi.org/10.1038/nbt.3597>
+- FBMN: <https://doi.org/10.1038/s41592-020-0933-6>
+
+### SIRIUS
+
+General: <https://doi.org/10.1038/s41592-019-0344-8>
+
+- *CSI:FingerId*: <https://doi.org/10.1073/pnas.1509788112>
+- *COSMIC*: <https://doi.org/10.1038/s41587-021-01045-9>
+
+### Others
+
+- *CFM-ID 4.0*: <https://doi.org/10.1021/acs.analchem.1c01465>
+- *MatchMS*: <https://doi.org/10.21105/joss.02411>
+- *MZmine4*: <https://doi.org/10.1038/s41587-023-01690-2>
 
 ## License
 
