@@ -109,7 +109,7 @@ K_estimation()
 
 3. **Provide Input Files**
 ### **Notes**
-- Ensure that your input files follow the required format (`.csv` for quantitative data, `.mgf` for mass spectrometry data).
+- Ensure that your input files follow the required format (`.csv` for quantitative data, `.mgf` for mass spectrometry data). If you use the exportfiles module of MZmine (>2.53) for FBMN, the format will be accepted.
 - Ensure that you have your sirius identification file related to your data.
 - Ensure internet connectivity for accessing GNPS and related services.
 - The save path for the `.tsv` file must have a valid `.tsv` extension and specify the desired file name (e.g., `/path/to/output_file.tsv`).
