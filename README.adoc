@@ -96,30 +96,34 @@ image::https://github.com/MejriY/Decide_test/raw/master/image/who%20it%20work.pn
 
 ### **How to Use `K_estimation`**
 
-1. **Below is an example of how to call the `K_estimation` function in Python and interact with its prompts:**
+**Below is an example of how to call the `K_estimation` function in Python and interact with its prompts:**
 
 ```python
 from ms2decide.K_estimation import K_estimation
 
 K_estimation()
 ```
-
-2. **Input credentials**
+**Input credentials**
    - The function will prompt you to provide your GNPS username, password, and email. This is necessary for authenticating on the GNPS platform.
 
-3. **Provide Input Files**
+**Provide Input Files**
+
 ### **Notes**
-- Ensure that your input files follow the required format (`.csv` for quantitative data, `.mgf` for mass spectrometry data). If you use the exportfiles module of MZmine (>2.53) for FBMN, the format will be accepted.
-- Ensure that you have your sirius identification file related to your data.
+- Ensure that your input files follow the required format (`.csv` for quantitative data, `.mgf` for mass spectrometry data). If you use the export file module of MZmine (>2.53) for FBMN, the format will be accepted.
+- Ensure that you have your Sirius identification file (annotation file) related to your data.
 - Ensure internet connectivity for accessing GNPS and related services.
 - The save path for the `.tsv` file must have a valid `.tsv` extension and specify the desired file name (e.g., `/path/to/output_file.tsv`).
 
 By following these steps, you can effectively use the `K_estimation` function to process and analyze your compound data.
-   - Specify the paths to the following required files:
-     - **Quantitative Table File**: A `.csv` file containing the quantitative data for your analysis. Ensure the file format is correct to avoid errors.
-     - **MGF File**: A file containing tandem mass spectrometry data in MGF format.
+Specify the paths to the following required files:
     
-   - Example paths:
+- **Quantitative Table File**: A `.csv` file containing the quantitative data for your analysis. Ensure the file format is correct to avoid errors.
+   
+- **MGF File**: A file containing tandem mass spectrometry data in MGF format.
+    
+  
+- Example paths:
+
      ```plaintext
      SELECT THE PATH FOR YOUR QUANTITATIVE FILE. This path needs to terminate with a *.csv at the end 
      : /path/to/quantitative_file.csv
@@ -127,8 +131,7 @@ By following these steps, you can effectively use the `K_estimation` function to
      SELECT THE PATH FOR YOUR MGF FILE.  This path needs to terminate with a *.mgf at the end 
      : /path/to/mgf_file.mgf
      ```
-
-4. **Set Up GNPS Workflow**
+**Set Up GNPS Workflow**
    - **FBMN Title:** Provide a unique and descriptive title for your FBMN job. 
 **Note**: A folder with this title will be created to upload the quantitative data and MGF files. Ensure the title you choose does not match the name of an existing folder.
    - Choose the type of GNPS library search:
@@ -139,30 +142,30 @@ At this level, 27 FBMN jobs will be launched on your GNPS account. In the case o
 
 image::https://github.com/MejriY/MS2DECIDE_pic/raw/main/image/gnps_iterative.png[]
 
-5. **ISDB-LOTUS Annotation**
+**ISDB-LOTUS Annotation**
    - The ISDB-LOTUS annotation is performed using the function `isdb_res = get_cfm_annotation(mgf, ISDBtol)`. During the process, the user will be prompted to provide:
      - **Ionization Mode**: Specify the ionization mode for annotation (`POS` for positive, `NEG` for negative).
      - **Mass Tolerance**: Provide a mass tolerance value less than `0.5` (default: `0.02`). **Note**: This value is comprised between 0 and 0.5.
    - This function calculates annotations by matching mass spectrometry data against ISDB-LOTUS spectral data accessible [here](https://zenodo.org/records/8287341)
 
-6. **Sirius Annotation**
+**Sirius Annotation**
    - Provide the path to the Sirius 6 annotation file (`structure_identifications.tsv`).
    - Select the confidence score type: (For more information on this choice, see the [SIRIUS documentation](https://v6.docs.sirius-ms.io/methods-background/#confidence-score-modes)
      - `exact`
      - `approximate`
 
-7. **Compile Annotations**
+**Compile Annotations**
    - Annotations from GNPS, Sirius, and ISDB-LOTUS are compiled into a unified dataframe.
    - The dataframe is filtered and sorted by \( K \)-values.
 
-8. **Export Results**
+**Export Results**
    - Specify the path to save the output `.tsv` file:
      ```plaintext
      SELECT THE SAVE PATH FOR THE .TSV FILE OF MS2DECIDE OUTPUT. 
      #This path needs to terminate with a file_name.tsv where `file_name` is the desired name specified by the user.
      ```
 
-9. **Optional: Retrieve Empty Annotations in the case of iterative weighted GNPS analog search**
+**Optional: Retrieve Empty Annotations in the case of iterative weighted GNPS analog search**
    - If requested (`yes`), the function generates a report of empty annotations and saves it as `empty.tsv`. This could help to complete metadata of existing MS/MS spectra on the GNPS.
 
 ---
