@@ -13,7 +13,7 @@ image::https://github.com/MejriY/Decide_test/raw/master/image/all_article_workfl
 You can install **MS2DECIDE** using either `pip` (recommended for most users) or `conda`. Follow the instructions below based on your preferred method:
 
 **Ensure Python is installed**  
-   Before proceeding, make sure Python (version 3.8 or higher) is installed on your system. Alternatively, you can use **Conda**, which includes Python. Download and install Conda from [here](https://docs.conda.io/projects/conda/en/stable/)[]
+   Before proceeding, make sure Python (version 3.8 or higher) is installed on your system. Alternatively, you can use **Conda**, which includes Python. Download and install Conda from [here](https://docs.conda.io/projects/conda/en/stable/)
 
 **Open the terminal**
 once you have installed Conda, open your terminal. On Windows, you can use the Anaconda Prompt, while on macOS and Linux, you can use the standard terminal.
@@ -75,7 +75,7 @@ python -c "import ms2decide; print('MS2DECIDE installed successfully!')"
 
 ## Usage Guide: `K_estimation`
 
-The `K_estimation` function is a core feature of `ms2decide`, designed to aggregate annotations from multiannotation tools as GNPS, ISDB-LOTUS, and Sirius by leveraging decision theory. This approach models expert preference elicitation to derive \( K \)-values for features prioritization, providing a unified and informed annotation estimate.
+The `K_estimation` function is a core feature of `ms2decide`, designed to aggregate multiannotation from GNPS, ISDB-LOTUS, and Sirius by leveraging decision theory. This approach models expert preference elicitation to derive \( K \)-values for features prioritization, providing a unified and informed annotation estimate.
 
 ---
 
@@ -94,9 +94,9 @@ image::https://github.com/MejriY/Decide_test/raw/master/image/who%20it%20work.pn
 
 ---
 
-### **How to Use `K_estimation`**
+### **How to use `K_estimation`**
 
-**Below is an example of how to call the `K_estimation` function in Python and interact with its prompts:**
+**Below is an example describing how to call the `K_estimation` function in Python and interact with its prompts:**
 
 ```python
 from ms2decide.K_estimation import K_estimation
@@ -108,7 +108,7 @@ K_estimation()
 
 **Provide Input Files**
 
-### **Notes**
+**Notes**
 - Ensure that your input files follow the required format (`.csv` for quantitative data, `.mgf` for mass spectrometry data). If you use the export file module of MZmine (>2.53) for FBMN, the format will be accepted.
 - Ensure that you have your Sirius identification file (annotation file) related to your data.
 - Ensure internet connectivity for accessing GNPS and related services.
@@ -117,9 +117,9 @@ K_estimation()
 By following these steps, you can effectively use the `K_estimation` function to process and analyze your compound data.
 Specify the paths to the following required files:
     
-- **Quantitative Table File**: A `.csv` file containing the quantitative data for your analysis. Ensure the file format is correct to avoid errors.
+- **Quantitative table file**: a `.csv` file containing the quantitative data for your analysis. Ensure the file format is correct to avoid errors.
    
-- **MGF File**: A file containing tandem mass spectrometry data in MGF format.
+- **MGF file**: a file containing tandem mass spectrometry data in MGF format.
     
   
 - Example paths:
@@ -140,28 +140,26 @@ Specify the paths to the following required files:
   
 - Choose the type of GNPS library search:
            - `strict`: Uses a typical mass difference tolerance of 0.02 Da and threshold value of 0.001. For more precise information, we recommend visiting the [GNPS Documentation on Library Search](https://ccms-ucsd.github.io/GNPSDocumentation/librarysearch/). 
-
-**Notes**: Since, this workflow uses a library score threshold of `0.001` some failures can occur with the FBMN GNPS workflow. We recommend to increase the threshold value (for e.g., 0.1) in the MS2DECIDE source code (line 123 in the file ClosestGNPS.py) or to report the failure to the GNPS staff.
      
        - `iterative`: for iterative weighted analog search (can take up to three hours).
 
-**Notes**: with iterative 27 FBMN jobs will be launched from your GNPS account. In the case of `strict`, only one job will be launched.
+**Notes**: Since, this workflow uses a library score threshold of `0.001` some failures can occur with the FBMN GNPS workflow. We recommend to increase the threshold value (for e.g., 0.1) by editing the MS2DECIDE source code (line 123 in the file ClosestGNPS.py) or to report the failure to the GNPS staff. The iterative workflow launches 27 FBMN jobs from your GNPS account. In the case of `strict`, only one job will be launched.
 
 
 image::https://github.com/MejriY/MS2DECIDE_pic/raw/main/image/gnps_iterative.png[]
 
 
-**ISDB-LOTUS Annotation**
+**ISDB-LOTUS annotation**
 
 The ISDB-LOTUS annotation is performed using the function `isdb_res = get_cfm_annotation(mgf, ISDBtol)`. During the process, the user will be prompted to choose:
     
-- **Ionization Mode**: Specify the ionization mode for annotation (`POS` for positive, `NEG` for negative).
+- **Ionization mode**: Specify the ionization mode for annotation (`POS` for positive, `NEG` for negative).
     
-- **Mass Tolerance**: Provide a mass tolerance value less than `0.5` (default: `0.02`). **Note**: This value is comprised between 0 and 0.5.
+- **Mass tolerance**: Provide a mass tolerance value less than `0.5` (default: `0.02`). **Note**: This value is comprised between 0 and 0.5.
    
 **Notes**: This function calculates annotations by matching mass spectrometry data against ISDB-LOTUS spectral data accessible [here](https://zenodo.org/records/8287341) using spectral_lib_matcher, based on the MatchMS library
 
-**Sirius Annotation**
+**Sirius annotation**
 
 - Provide the path to the Sirius 6 annotation file (`structure_identifications.tsv`)
 
@@ -179,7 +177,7 @@ Select the confidence score type:
 **Notes**: For more information on this choice, see the [SIRIUS documentation](https://v6.docs.sirius-ms.io/methods-background/#confidence-score-modes)
 
 
-**Compile Annotations and export Results**
+**Compile annotations and export results**
 
 - Annotations from GNPS, Sirius, and ISDB-LOTUS are compiled into a unified dataframe.
 
@@ -192,9 +190,9 @@ Select the confidence score type:
      #This path needs to terminate with a file_name.tsv where `file_name` is the desired name specified by the user.
      ```
 
-**Optional: Retrieve Empty Annotations in the case of iterative weighted GNPS analog search**
+**Optional: Retrieve empty annotations in the case of iterative weighted GNPS analog search**
 
-- If requested (`yes`), the function generates a report of empty annotations and saves it as `empty.tsv`. This could help to complete missing InChIs or SMILES of existing MS/MS spectra on the GNPS.
+- If requested (`yes`), the function generates a report of empty annotations and saves it as `empty.tsv`. This could help to complete missing InChIs or SMILES for existing MS/MS spectra on the GNPS.
 
 ---
 
@@ -212,7 +210,7 @@ In scenarios where there is no match with GNPS or no match with Sirius, the tani
 Sirius annotations were performed in batch mode by using Sirius 6. we utilized the Confidence Approximate score. Unfortunately, in some cases, Sirius was not able to propose an annotation. To remedy, we associated a value of 0.5 to Sirius matching score.
 
 === ISDB-LOTUS
-For ISDB-LOTUS, since a strict library search was applied (0.02 Da), we considered a zero answer as an important information regarding our definition of novelty. Hence, no mean value was associated.
+For ISDB-LOTUS, since a strict library search was applied (0.02 Da), we considered a zero answer as an important information regarding our definition of novelty.
 
 ## Main Citations
 
@@ -224,15 +222,13 @@ the tools/resources used.
 
 General: <https://doi.org/10.7554/eLife.70780>
 
-⚠️ Do not forget to cite which version you used:
-<https://doi.org/10.5281/zenodo.5794106>
+Version used: <https://doi.org/10.5281/zenodo.5794106>
 
 ### ISDB
 
 General: <https://doi.org/10.1021/acs.analchem.5b04804>
 
-⚠️ Do not forget to cite which version you used:
-<https://doi.org/10.5281/zenodo.5607185>
+Version used: <https://doi.org/10.5281/zenodo.5607185>
 
 ### GNPS
 
