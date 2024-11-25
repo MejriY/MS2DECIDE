@@ -22,14 +22,15 @@ You can install **MS2DECIDE** using either `pip` (recommended for most users) or
 Once you have installed Conda, open your terminal. On Windows, you can use the Anaconda Prompt, while on macOS and Linux, you can use the standard terminal.
 
 **Set up a virtual environment**  
-   Create an isolated environment using `conda`.
+   
+Create an isolated environment using `conda`.
 
 [source,console]
 ----
 conda create --name ms2decide_env python=3.12
 ----
 
-During the process, you will see a message like this:
+During the process, you will see the following message:
 [source,console]
 ----
 The following NEW packages will be INSTALLED:
@@ -40,15 +41,24 @@ Proceed ([y]/n)?
 
 Make sure to type **y** (or press Enter) to proceed with the installation.
 
+Activate the `conda` environment
+[source,console]
+----
+conda activate ms2decide_env
+----
+
+Download or clone the [repository](https://github.com/MejriY/MS2DECIDE)
+
 **Install the library**  
-   You can install it using `pip` by replacing `MS2DECIDE_Folder` with the actual path to the folder:
+  
+You can install it using `pip` by replacing `MS2DECIDE_Folder` with the actual path to the folder:
 
 [source,console]
 ----
 pip install 'MS2DECIDE_Folder'.
 ----
-
-   If you are installing from a GitHub repository, use:
+   
+If you are installing from a GitHub repository, use:
 
 [source,console]
 ----
