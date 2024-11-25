@@ -101,8 +101,7 @@ image::https://github.com/MejriY/Decide_test/raw/master/image/who%20it%20work.pn
 ```python
 from ms2decide.K_estimation import K_estimation
 
-# Run the function to estimate K values
-df = K_estimation()
+K_estimation()
 ```
 
 2. **Input credentials**
