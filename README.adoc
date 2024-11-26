@@ -220,20 +220,20 @@ the tools/resources used.
 
 ### LOTUS
 
-General: <https://doi.org/10.7554/eLife.70780>
+- General: <https://doi.org/10.7554/eLife.70780>
 
-Version used: <https://doi.org/10.5281/zenodo.5794106>
+- Version used: <https://doi.org/10.5281/zenodo.5794106>
 
 ### ISDB
 
-General: <https://doi.org/10.1021/acs.analchem.5b04804>
+- General: <https://doi.org/10.1021/acs.analchem.5b04804>
 
-Version used: <https://doi.org/10.5281/zenodo.5607185>
+- Version used: <https://doi.org/10.5281/zenodo.5607185>
 
 ### GNPS
 
 - General: <https://doi.org/10.1038/nbt.3597>
-- FBMN: <https://doi.org/10.1038/s41592-020-0933-6>
+- *FBMN*: <https://doi.org/10.1038/s41592-020-0933-6>
 
 ### SIRIUS
 
