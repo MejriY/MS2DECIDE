@@ -101,6 +101,7 @@ image::https://github.com/MejriY/Decide_test/raw/master/image/who%20it%20work.pn
 ```python
 from ms2decide.K_estimation import K_estimation
 
+
 K_estimation()
 ```
 **Input credentials**
@@ -112,7 +113,7 @@ K_estimation()
 - Ensure that your input files follow the required format (`.csv` for quantitative data, `.mgf` for mass spectrometry data). If you use the export file module of MZmine (>2.53) for FBMN, the format will be accepted.
 - Ensure that you have your Sirius identification file (annotation file) related to your data.
 - Ensure internet connectivity for accessing GNPS and related services.
-- The save path for the `.tsv` file must have a valid `.tsv` extension and specify the desired file name (e.g., `/path/to/output_file.tsv`).
+- The save path for the `.tsv` file must have a valid `.tsv` extension and specify the desired file name (e.g., `\path\to\output_file.tsv`).
 
 By following these steps, you can effectively use the `K_estimation` function to process and analyze your compound data.
 Specify the paths to the following required files:
@@ -126,10 +127,10 @@ Specify the paths to the following required files:
 
      ```plaintext
      SELECT THE PATH FOR YOUR QUANTITATIVE FILE. This path needs to terminate with a *.csv at the end 
-     : /path/to/quantitative_file.csv
+     : \path\to\quantitative_file.csv
 
      SELECT THE PATH FOR YOUR MGF FILE.  This path needs to terminate with a *.mgf at the end 
-     : /path/to/mgf_file.mgf
+     : \path\to\mgf_file.mgf
      ```
 
 **Setup GNPS Workflow**
@@ -143,7 +144,8 @@ Specify the paths to the following required files:
      
        - `iterative`: for iterative weighted analog search (can take up to three hours).
 
-**Notes**: Since, this workflow uses a library score threshold of `0.001` some failures can occur with the FBMN GNPS workflow. We recommend to increase the threshold value (for e.g., 0.1) by editing the MS2DECIDE source code (line 123 in the file ClosestGNPS.py) or to report the failure to the GNPS staff. The iterative workflow launches 27 FBMN jobs from your GNPS account. In the case of `strict`, only one job will be launched.
+**Notes**: Since, this workflow uses a library score threshold of `0.001` some failures can occur with the FBMN GNPS workflow. We recommend to increase the threshold value (for e.g., 0.1) by editing the MS2DECIDE source code (line 123 in the file ClosestGNPS.py) or to report the failure to the GNPS staff. After updating the threshold value in the file ClosestGNPS.py, don't forget to uninstall ms2decide (pip uninstall ms2decide) and reinstall it again as described above.
+For your information, the iterative workflow launches 27 FBMN jobs from your GNPS account. In the case of `strict`, only one job will be launched.
 
 
 image::https://github.com/MejriY/MS2DECIDE_pic/raw/main/image/gnps_iterative.png[]
