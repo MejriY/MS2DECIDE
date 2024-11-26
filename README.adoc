@@ -52,7 +52,7 @@ You can install it using `pip` by replacing `MS2DECIDE_Folder` with the actual p
 
 [source,console]
 ----
-pip install 'MS2DECIDE_Folder'.
+pip install 'MS2DECIDE_Folder'
 ----
    
 If you are installing from a GitHub repository, use:
