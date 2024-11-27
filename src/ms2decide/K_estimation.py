@@ -43,7 +43,7 @@ def K_estimation():
             "DO YOU WANT TO SAVE ITERATIVE GNPS JOBS? (yes or no)")
         if(fald_job.lower()=='yes'):
             save_path_job = input(
-                'SELECT THE SAVE PATH FOR THE .txt FILE OF ITERATIVE GNPS JOBS. \n This path needs to terminate with a *.txt at the end')
+                'SELECT THE SAVE PATH FOR THE .txt FILE OF ITERATIVE GNPS JOBS. \n This path needs to terminate with a *.txt at the end \n :')
             f = open(save_path_job,"w")
             f.write( str(dict_task_id) )
             f.close()
