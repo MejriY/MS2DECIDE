@@ -144,7 +144,7 @@ Specify the paths to the following required files:
      
        - `iterative`: for iterative weighted analog search (can take up to three hours).
 
-**Notes**: Since, this workflow uses a library score threshold of `0.001` some failures can occur with the FBMN GNPS workflow. We recommend to increase the threshold value (for e.g., 0.1) by editing the MS2DECIDE source code (line 123 in the file ClosestGNPS.py) or to report the failure to the GNPS staff. After updating the threshold value in the file ClosestGNPS.py, don't forget to uninstall ms2decide (pip uninstall ms2decide) and reinstall it again as described above.
+**Notes**: Since, this workflow uses a library score threshold of `0.001` some failures can occur with the FBMN GNPS workflow. We recommend to increase the threshold value (for e.g., 0.1) or to report the failure to the GNPS staff.
 For your information, the iterative workflow launches 27 FBMN jobs from your GNPS account. In the case of `strict`, only one job will be launched.
 
 
