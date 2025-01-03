@@ -46,6 +46,8 @@ class SiriusAnnotation():
                     sc = float(data_sirius[ID][indexScore])
                 except:
                     sc = 0
+                if (str(sc) == '-inf'):
+                    sc = 0
                 data[ID] = MatchedSpectra(
                     mgf_instance.data[ID], get_correct_inchi(data_sirius[ID]), sc)
             else:

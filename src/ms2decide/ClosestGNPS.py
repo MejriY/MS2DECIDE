@@ -221,12 +221,15 @@ def _launch_GNPS_workflow_iterative(auth, path_file_mgf_in_gnps, path_file_quan_
     Returns:
         dict: A dictionary containing task IDs for different peak and mass combinations.
     """
+    SCORE_THRESHOLD = input(
+        "INPUT A SCORE_THRESHOLD FOR ITERATIVE GNPS. DEFAULT 0.001")
     D_job = {}
     for peak in [6, 5, 4]:
         d = {i: 0 for i in [0.02, 0.1, 10, 25, 50, 100, 250, 500, 0]}
         for mass_diff in [0.02, 0.1, 10, 25, 50, 100, 250, 500, 0]:
             invokeParameters = {}
             invokeParameters = _get_networking_parameters()
+            invokeParameters["SCORE_THRESHOLD"]=SCORE_THRESHOLD
             invokeParameters["MIN_MATCHED_PEAKS_SEARCH"] = str(peak)
             invokeParameters["MAX_SHIFT_MASS"] = str(mass_diff)
             invokeParameters["desc"] = job_description + \
@@ -274,7 +277,8 @@ def _gnps_annotations_download_results(task_id):
         print(' FBMN job detected with ' +
               str(df_annotations.shape[0]-1) + ' spectral library annotations in the job:' + task_id)
         print('==================')
-        df_annotations[['#Scan#', 'MQScore']] = df_annotations[['#Scan#', 'MQScore']].apply(pd.to_numeric)
+        df_annotations[['#Scan#', 'MQScore']] = df_annotations[[
+            '#Scan#', 'MQScore']].apply(pd.to_numeric)
         return (df_annotations)
     except json.JSONDecodeError as e:
         print(f"JSON Decode Error: {e}")
@@ -314,7 +318,7 @@ def closest_gnps(auth, input_file_mgf, input_file_quan):
     df_anno = _gnps_annotations_download_results(task_id)
     df_anno = df_anno.rename(columns=str.lower)
     dic_anno = df_anno.set_index("#scan#").to_dict('index')
-    dic_anno = {int(i):dic_anno[i] for i in dic_anno}
+    dic_anno = {int(i): dic_anno[i] for i in dic_anno}
     matched_spectra_dict = {}
     for ID in dict_data:
         if (ID in dic_anno):
@@ -389,7 +393,7 @@ def closest_gnps_by_id(job_id, mgf_path):
     df_anno = _gnps_annotations_download_results(job_id)
     df_anno = df_anno.rename(columns=str.lower)
     dic_anno = df_anno.set_index("#scan#").to_dict('index')
-    dic_anno = {int(i):dic_anno[i] for i in dic_anno}
+    dic_anno = {int(i): dic_anno[i] for i in dic_anno}
     mgf_instance = MgfInstance(Path(mgf_path))
     dict_data = mgf_instance.data
     matched_spectra_dict = {}
