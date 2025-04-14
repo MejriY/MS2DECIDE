@@ -28,8 +28,10 @@ def K_estimation():
     mail = input('GNPS mail: ')
     auth = AuthMail(username, password, mail)
 
-    quan_path = input('SELECT THE PATH FOR YOUR QUANTITATIVE FILE. This path needs to terminate with a *.csv at the end \n :')
-    mgf_path = input('SELECT THE PATH FOR YOU MGF FILE. This path needs to terminate with a *.mgf at the end \n :')
+    quan_path = input(
+        'SELECT THE PATH FOR YOUR QUANTITATIVE FILE. This path needs to terminate with a *.csv at the end \n :')
+    mgf_path = input(
+        'SELECT THE PATH FOR YOU MGF FILE. This path needs to terminate with a *.mgf at the end \n :')
     mgf = MgfInstance(Path(mgf_path))
     job_description = input('INPUT A TITLE FOR YOUR FBMN GNPS JOB \n :')
     path_file_mgf_in_gnps, path_file_quan_in_gnps = _upload_to_gnps(
@@ -41,15 +43,17 @@ def K_estimation():
             auth, path_file_mgf_in_gnps, path_file_quan_in_gnps, job_description)
         fald_job = input(
             "DO YOU WANT TO SAVE ITERATIVE GNPS JOBS? (yes or no)")
-        if(fald_job.lower()=='yes'):
+        if (fald_job.lower() == 'yes'):
             save_path_job = input(
                 'SELECT THE SAVE PATH FOR THE .txt FILE OF ITERATIVE GNPS JOBS. \n This path needs to terminate with a *.txt at the end \n :')
-            f = open(save_path_job,"w")
-            f.write( str(dict_task_id) )
+            f = open(save_path_job, "w")
+            f.write(str(dict_task_id))
             f.close()
     else:
+        score_threshold = input(
+            'Please can you provide a minimum cosine score that MS/MS spectra should get in spectral matching ')
         task_id = _launch_GNPS_workflow(auth, path_file_mgf_in_gnps,
-                                        path_file_quan_in_gnps, job_description)
+                                        path_file_quan_in_gnps, job_description, score_threshold)
 
     ISDBtol = float(
         input('SELECT MASS TOLERANCE FOR ISDB-LOTUS ANNOTATION (LESS THAN 0.5, DEFAULT 0.02) '))

@@ -181,7 +181,7 @@ def _get_iterative_parameters():
     return alpha
 
 
-def _launch_GNPS_workflow(auth, path_file_mgf_in_gnps, path_file_quan_in_gnps, job_description):
+def _launch_GNPS_workflow(auth, path_file_mgf_in_gnps, path_file_quan_in_gnps, job_description, score_threshold):
     """
     Log in to GNPS using username and password, upload file to MassIVE repository, and launch feature-based molecular networking workflow.
 
@@ -195,6 +195,7 @@ def _launch_GNPS_workflow(auth, path_file_mgf_in_gnps, path_file_quan_in_gnps, j
     """
     invokeParameters = {}
     invokeParameters = _get_networking_parameters()
+    invokeParameters["SCORE_THRESHOLD"] = score_threshold
     invokeParameters["desc"] = job_description
     invokeParameters["MAX_SHIFT_MASS"] = str(0.02)
     invokeParameters["quantification_table"] = "d./" + \
@@ -229,7 +230,7 @@ def _launch_GNPS_workflow_iterative(auth, path_file_mgf_in_gnps, path_file_quan_
         for mass_diff in [0.02, 0.1, 10, 25, 50, 100, 250, 500, 0]:
             invokeParameters = {}
             invokeParameters = _get_networking_parameters()
-            invokeParameters["SCORE_THRESHOLD"]=SCORE_THRESHOLD
+            invokeParameters["SCORE_THRESHOLD"] = SCORE_THRESHOLD
             invokeParameters["MIN_MATCHED_PEAKS_SEARCH"] = str(peak)
             invokeParameters["MAX_SHIFT_MASS"] = str(mass_diff)
             invokeParameters["desc"] = job_description + \
