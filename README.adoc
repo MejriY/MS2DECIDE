@@ -134,7 +134,7 @@ Specify the paths to the following required files:
 
      SELECT THE PATH FOR YOUR MGF FILE.  This path needs to terminate with a *.mgf at the end 
      : \path\to\mgf_file.mgf
-     ```
+
 
 **Setup GNPS Workflow**
 
