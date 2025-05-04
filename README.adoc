@@ -128,7 +128,7 @@ Specify the paths to the following required files:
   
 - Example paths:
 
-     ```plaintext
+ 
      SELECT THE PATH FOR YOUR QUANTITATIVE FILE. This path needs to terminate with a *.csv at the end 
      : \path\to\quantitative_file.csv
 
