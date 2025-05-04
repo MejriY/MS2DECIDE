@@ -147,7 +147,7 @@ Specify the paths to the following required files:
 
            - `iterative`: for iterative weighted analog search (can take up to three hours).
 
-**Notes**: Since, these workflows use a library score threshold of `0.001` some failures can occur with the FBMN GNPS workflow. We recommend to increase the threshold value (for e.g., 0.1) till you find a threshold value that does not generate failures. You can specify this value at the prompt: 
+**Notes**: Since, these workflows use a library score threshold of `0.001` some failures can occur with the FBMN GNPS workflow. We recommend to increase the threshold value (for e.g., 0.1). You can specify this value at the following prompt: 
 
 Please can you provide a minimum cosine score that MS/MS spectra should get in spectral matching
 
@@ -171,10 +171,10 @@ The ISDB-LOTUS annotation is performed using the function `isdb_res = get_cfm_an
 
 - Provide the path to the Sirius 6 annotation file (`structure_identifications.tsv`)
 
-   ```plaintext
+
      SELECT THE PATH FOR YOUR SIRIUS6 ANNOTATION FILE. 
      #This path needs to terminate with structure_identifications.tsv at the end.
-     ```
+
 
 Select the confidence score type: 
 
@@ -193,10 +193,10 @@ Select the confidence score type:
 
 - Specify the path to save the output `.tsv` file:
 
-     ```plaintext
+
      SELECT THE SAVE PATH FOR THE .TSV FILE OF MS2DECIDE OUTPUT. 
      #This path needs to terminate with a file_name.tsv where `file_name` is the desired name specified by the user.
-     ```
+ 
 
 **Optional: Retrieve empty annotations in the case of iterative weighted GNPS analog search**
 
