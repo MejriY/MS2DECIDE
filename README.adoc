@@ -98,13 +98,15 @@ image::https://github.com/MejriY/Decide_test/raw/master/image/who%20it%20work.pn
 
 **Below is an example describing how to call the `K_estimation` function in Python and interact with its prompts:**
 
-```python
+[source,console]
+----
 from ms2decide.K_estimation import K_estimation
 ----
 
-```python
+[source,console]
+----
 K_estimation()
-```
+----
 **Input credentials**
    - The function will prompt you to provide your GNPS username, password, and email. This is necessary for authenticating on the GNPS platform.
 
