@@ -149,7 +149,7 @@ Specify the paths to the following required files:
 
 **Notes**: Since, these workflows use a library score threshold of `0.001` some failures can occur with the FBMN GNPS workflow. We recommend to increase the threshold value (for e.g., 0.1). You can specify this value at the following prompt: 
 
-Please can you provide a minimum cosine score that MS/MS spectra should get in spectral matching
+"Please can you provide a minimum cosine score that MS/MS spectra should get in spectral matching"
 
 For your information, the iterative workflow launches 27 FBMN jobs from your GNPS account. In the case of `strict`, only one job will be launched.
 
@@ -170,7 +170,7 @@ The ISDB-LOTUS annotation is performed using the function `isdb_res = get_cfm_an
 **Sirius annotation**
 
 - Provide the path to the Sirius 6 annotation file (`structure_identifications.tsv`)
-
+**Notes**: At this step, you can have an error message like this one: "ValueError: DataFrame index must be unique for orient='index'." We recommend to check this file for redundant features that can be generated in the Sirius annotation process. You can open the `structure_identifications.tsv` on Excel for example and highlight the redundant values in the "mappingFeatureId" column.
 
      SELECT THE PATH FOR YOUR SIRIUS6 ANNOTATION FILE. 
      #This path needs to terminate with structure_identifications.tsv at the end.
