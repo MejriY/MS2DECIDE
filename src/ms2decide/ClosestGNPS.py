@@ -67,7 +67,7 @@ def _upload_to_gnps(auth, input_file_mgf, input_file_quan, folder):
     """
     username = auth.username
     password = auth.password
-    url = "ccms-ftp01.ucsd.edu"
+    url = "massive-ftp.ucsd.edu"
     ftp = ftplib.FTP(url, username, password)
     print("Login successful \n")
     try:
