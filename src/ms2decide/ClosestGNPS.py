@@ -11,7 +11,7 @@ import sys
 import pandas as pd
 from pathlib import Path
 import ftplib
-# import datetime
+import time
 
 
 def _invoke_workflow(auth, base_url, parameters):
@@ -286,7 +286,7 @@ def _gnps_annotations_download_results(task_id):
         raise Exception('CAN NOT GET THE DATA FROM THE JOB: ' + task_id)
 
 
-def _wait_for_workflow_finish(dict_task_id):
+def _workflows_statues(dict_task_id):
     state = set()
     url = 'https://gnps.ucsd.edu/ProteoSAFe/status_json.jsp?task={}'
     for peak in dict_task_id:
@@ -297,7 +297,15 @@ def _wait_for_workflow_finish(dict_task_id):
     return (state)
 
 
-def closest_gnps(auth, input_file_mgf, input_file_quan):
+def _wait_for_workflow_finish(dict_task_id):
+    statues = _workflows_statues(dict_task_id)
+    while statues != {'DONE'} :
+        time.sleep(60)
+        statues = _workflows_statues(dict_task_id)
+    print('all Jobs done')
+
+
+def closest_gnps(auth, input_file_mgf, input_file_quan, folder, score_threshold):
     """
     Returns a dictionary of MatchedSpectra objects for the closest matches in GNPS.
 
@@ -311,11 +319,11 @@ def closest_gnps(auth, input_file_mgf, input_file_quan):
     mgf_instance = MgfInstance(Path(input_file_mgf))
     dict_data = mgf_instance.data
     path_file_mgf_in_gnps, path_file_quan_in_gnps = _upload_to_gnps(
-        auth, input_file_mgf, input_file_quan)
+        auth, input_file_mgf, input_file_quan, folder)
     job_description = input_file_mgf.stem
     task_id = _launch_GNPS_workflow(
-        auth, path_file_mgf_in_gnps, path_file_quan_in_gnps, job_description)
-    _wait_for_workflow_finish("gnps.ucsd.edu", task_id)
+        auth, path_file_mgf_in_gnps, path_file_quan_in_gnps, job_description, score_threshold)
+    _wait_for_workflow_finish({0:{0:task_id}})
     df_anno = _gnps_annotations_download_results(task_id)
     df_anno = df_anno.rename(columns=str.lower)
     dic_anno = df_anno.set_index("#scan#").to_dict('index')
@@ -425,7 +433,7 @@ def closest_gnps_iterative(auth, input_file_mgf, input_file_quan):
         auth, input_file_mgf, input_file_quan, job_description)
     dict_task_id = _launch_GNPS_workflow_iterative(
         auth, path_file_mgf_in_gnps, path_file_quan_in_gnps, job_description)
-    _wait_for_workflow_finish("gnps.ucsd.edu", dict_task_id[4][0])
+    _wait_for_workflow_finish(dict_task_id)
 
     res = {}
     for peak in dict_task_id:
