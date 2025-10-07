@@ -303,6 +303,7 @@ def _wait_for_workflow_finish(dict_task_id):
         time.sleep(60)
         statues = _workflows_statues(dict_task_id)
     print('all Jobs done')
+    return statues
 
 
 def closest_gnps(auth, input_file_mgf, input_file_quan, folder, score_threshold):
