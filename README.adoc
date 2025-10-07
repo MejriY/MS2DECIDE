@@ -100,7 +100,7 @@ image::https://github.com/MejriY/Decide_test/raw/master/image/who%20it%20work.pn
 
 [source,console]
 ----
-python -c "import ms2decide; print('MS2DECIDE installed successfully!')"
+python
 ----
 Then
 
