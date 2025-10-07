@@ -96,7 +96,13 @@ image::https://github.com/MejriY/Decide_test/raw/master/image/who%20it%20work.pn
 
 ### **How to use `K_estimation`**
 
-**Below is an example describing how to call the `K_estimation` function in Python and interact with its prompts:**
+**To call the `K_estimation` function in Python and interact with its prompts, launch Python**
+
+[source,console]
+----
+python -c "import ms2decide; print('MS2DECIDE installed successfully!')"
+----
+Then
 
 [source,console]
 ----
