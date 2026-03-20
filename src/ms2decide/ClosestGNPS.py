@@ -12,6 +12,9 @@ import pandas as pd
 from pathlib import Path
 import ftplib
 import time
+import ssl
+import socket
+import os
 
 
 def _invoke_workflow(auth, base_url, parameters):
@@ -30,6 +33,17 @@ def _invoke_workflow(auth, base_url, parameters):
     username = auth.username
     password = auth.password
 
+    verify_https = str(os.getenv("MS2DECIDE_HTTPS_VERIFY_TLS", "0")).lower() in (
+        "1", "true", "yes"
+    )
+
+    if not verify_https:
+        try:
+            from urllib3.exceptions import InsecureRequestWarning
+            requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
+        except Exception:
+            pass
+
     s = requests.Session()
 
     payload = {
@@ -38,10 +52,13 @@ def _invoke_workflow(auth, base_url, parameters):
         'login': 'Sign in'
     }
 
-    r = s.post('https://' + base_url +
-               '/ProteoSAFe/user/login.jsp', data=payload, verify=False)
+    r = s.post(
+        'https://' + base_url + '/ProteoSAFe/user/login.jsp',
+        data=payload,
+        verify=verify_https,
+    )
     r = s.post('https://' + base_url + '/ProteoSAFe/InvokeTools',
-               data=parameters, verify=False)
+               data=parameters, verify=verify_https)
     task_id = r.text
 
     print(r.text, file=sys.stderr, flush=True)
@@ -55,44 +72,201 @@ def _invoke_workflow(auth, base_url, parameters):
 
 
 def _upload_to_gnps(auth, input_file_mgf, input_file_quan, folder):
-    """
-    Log in to the MassIVE repository (GNPS library) to upload a given file.
-
-    Args:
-        auth (Auth): Authentication object with username and password.
-        input_file (str): The local path of the .mfg file.
-
-    Returns:
-        str: The name of the uploaded file.
-    """
     username = auth.username
     password = auth.password
     url = "massive-ftp.ucsd.edu"
-    ftp = ftplib.FTP(url, username, password)
-    print("Login successful \n")
-    try:
-        ftp.mkd(folder)
-        ftp.cwd('/'+folder+'/')
-    except:
-        raise Exception('Folder already in server')
-    print('Folder created')
-    pp = ftp.pwd()
-    file_mgf = open(str(input_file_mgf), "rb")
-    input_file_mgf = Path(input_file_mgf).stem+'.mgf'
-    ftpCommand = "STOR " + input_file_mgf
-    ftpResponseMessage = ftp.storbinary(ftpCommand, fp=file_mgf)
-    file_mgf.close()
-    path_mgf = pp+'/'+input_file_mgf
 
-    file_quan = open(str(input_file_quan), "rb")
-    input_file_csv = Path(input_file_quan).stem+'.csv'
-    ftpCommand = "STOR " + input_file_csv
-    ftpResponseMessage = ftp.storbinary(ftpCommand, fp=file_quan)
-    file_quan.close()
-    ftp.close()
-    path_csv = pp+'/'+input_file_csv
-    print('Files uploaded')
-    return (path_mgf, path_csv)
+    # GNPS/MassIVE FTPS can expose certificate-chain issues on some Conda/Windows
+    # stacks. Keep encryption but disable certificate verification by default to
+    # match historical ftplib FTP_TLS behavior and maintain compatibility.
+    verify_tls = str(os.getenv("MS2DECIDE_FTPS_VERIFY_TLS", "0")).lower() in (
+        "1", "true", "yes"
+    )
+    ssl_context = ssl.create_default_context() if verify_tls else ssl._create_unverified_context()
+    if hasattr(ssl, "TLSVersion"):
+        ssl_context.minimum_version = ssl.TLSVersion.TLSv1_2
+        ssl_context.maximum_version = ssl.TLSVersion.TLSv1_2
+
+    connection_errors = (
+        ConnectionResetError,
+        ConnectionAbortedError,
+        BrokenPipeError,
+        TimeoutError,
+        EOFError,
+        ssl.SSLError,
+        OSError,
+        ftplib.error_temp,
+        ftplib.error_proto,
+    )
+
+    folder = str(folder).strip().strip("/\\")
+    if not folder:
+        raise ValueError("Le nom du dossier distant ne peut pas être vide.")
+
+    debug_ftp = str(os.getenv("MS2DECIDE_FTPS_DEBUG", "0")).lower() in (
+        "1", "true", "yes"
+    )
+
+    class _FTP_TLS_SessionReuse(ftplib.FTP_TLS):
+        """FTPS client that reuses control-channel TLS session for data channels.
+
+        Some FTPS servers close data connections unless TLS session reuse is enabled.
+        """
+
+        def ntransfercmd(self, cmd, rest=None):
+            conn, size = ftplib.FTP.ntransfercmd(self, cmd, rest)
+            if self._prot_p:
+                wrap_kwargs = {"server_hostname": self.host}
+                session = getattr(self.sock, "session", None)
+                if session is not None:
+                    wrap_kwargs["session"] = session
+                conn = self.context.wrap_socket(conn, **wrap_kwargs)
+            return conn, size
+
+    def _connect(strategy):
+        ftp_cls = _FTP_TLS_SessionReuse if strategy["session_reuse"] else ftplib.FTP_TLS
+        ftp_conn = ftp_cls(context=ssl_context)
+        if debug_ftp:
+            ftp_conn.set_debuglevel(2)
+        ftp_conn.connect(url, 21, timeout=120)
+        ftp_conn.af = socket.AF_INET
+        ftp_conn.login(username, password)
+        if strategy["private_data_channel"]:
+            ftp_conn.prot_p()
+        else:
+            ftp_conn.prot_c()
+        ftp_conn.set_pasv(strategy["passive"])
+        ftp_conn.voidcmd("TYPE I")
+        try:
+            ftp_conn.sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+        except OSError:
+            pass
+        return ftp_conn
+
+    def _safe_close(ftp_conn):
+        if ftp_conn is None:
+            return
+        try:
+            ftp_conn.quit()
+        except Exception:
+            try:
+                ftp_conn.close()
+            except Exception:
+                pass
+
+    def _prepare_remote_folder(ftp_conn):
+        print("Current remote directory:", ftp_conn.pwd())
+        # Try to enter the user directory when the FTP server exposes it.
+        for candidate in (username, f"/{username}"):
+            try:
+                ftp_conn.cwd(candidate)
+                print("Entered user directory:", ftp_conn.pwd())
+                break
+            except ftplib.error_perm:
+                continue
+        else:
+            print("User directory not accessible directly, staying in:", ftp_conn.pwd())
+
+        try:
+            ftp_conn.mkd(folder)
+            print("Folder created")
+        except ftplib.error_perm as e:
+            print("MKD skipped:", e)
+
+        try:
+            ftp_conn.cwd(folder)
+        except ftplib.error_perm as e:
+            raise Exception(f"Impossible d'accéder au dossier '{folder}': {e}")
+
+        print("Working remote directory:", ftp_conn.pwd())
+
+    def _upload_one_file(ftp_conn, local_path, remote_name, strategy, retries=4):
+        for attempt in range(1, retries + 1):
+            try:
+                with open(str(local_path), "rb") as file_in:
+                    ftp_conn.storbinary(
+                        f"STOR {remote_name}",
+                        file_in,
+                        blocksize=256 * 1024,
+                    )
+                return ftp_conn
+            except connection_errors as exc:
+                if attempt == retries:
+                    raise
+                print(
+                    f"Upload failed for {remote_name} (attempt {attempt}/{retries}): {exc}. Reconnecting..."
+                )
+                _safe_close(ftp_conn)
+                time.sleep(min(attempt * 2, 8))
+                ftp_conn = _connect(strategy)
+                _prepare_remote_folder(ftp_conn)
+
+        return ftp_conn
+
+    upload_strategies = [
+        {
+            "name": "FTPS passive (PROT P + session reuse)",
+            "passive": True,
+            "private_data_channel": True,
+            "session_reuse": True,
+        },
+        {
+            "name": "FTPS passive (PROT P)",
+            "passive": True,
+            "private_data_channel": True,
+            "session_reuse": False,
+        },
+        {
+            "name": "FTPS active (PROT P)",
+            "passive": False,
+            "private_data_channel": True,
+            "session_reuse": False,
+        },
+        {
+            "name": "FTPS passive (PROT C)",
+            "passive": True,
+            "private_data_channel": False,
+            "session_reuse": False,
+        },
+    ]
+
+    last_error = None
+    def _safe_remote_name(name):
+        # Avoid FTP path parsing issues with whitespace and control chars.
+        cleaned = "".join(ch if ch.isprintable() else "_" for ch in name)
+        cleaned = "_".join(cleaned.split())
+        return cleaned or "upload_file"
+
+    remote_mgf = _safe_remote_name(Path(input_file_mgf).name)
+    remote_csv = _safe_remote_name(Path(input_file_quan).name)
+
+    for strategy in upload_strategies:
+        ftp = None
+        try:
+            print(f"Trying upload strategy: {strategy['name']}")
+            ftp = _connect(strategy)
+            print("Login successful")
+            _prepare_remote_folder(ftp)
+
+            ftp = _upload_one_file(ftp, input_file_mgf, remote_mgf, strategy)
+            path_mgf = ftp.pwd() + "/" + remote_mgf
+            print("MGF uploaded:", path_mgf)
+
+            ftp = _upload_one_file(ftp, input_file_quan, remote_csv, strategy)
+            path_csv = ftp.pwd() + "/" + remote_csv
+            print("CSV uploaded:", path_csv)
+
+            print("Files uploaded")
+            return (path_mgf, path_csv)
+        except connection_errors as exc:
+            last_error = exc
+            print(f"Strategy failed: {strategy['name']} -> {exc}")
+        finally:
+            _safe_close(ftp)
+
+    raise ConnectionError(
+        f"Impossible de televerser les fichiers sur GNPS apres plusieurs strategies FTPS. Derniere erreur: {last_error}"
+    )
 
 
 def _get_networking_parameters():
@@ -289,19 +463,43 @@ def _gnps_annotations_download_results(task_id):
 def _workflows_statues(dict_task_id):
     state = set()
     url = 'https://gnps.ucsd.edu/ProteoSAFe/status_json.jsp?task={}'
+    verify_https = str(os.getenv("MS2DECIDE_HTTPS_VERIFY_TLS", "0")).lower() in (
+        "1", "true", "yes"
+    )
+    if not verify_https:
+        try:
+            from urllib3.exceptions import InsecureRequestWarning
+            requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
+        except Exception:
+            pass
+
     for peak in dict_task_id:
         for mass in dict_task_id[peak]:
-            json_obj = json.loads(requests.get(url.format(
-                dict_task_id[peak][mass]), verify=False).text)
+            json_obj = json.loads(
+                requests.get(
+                    url.format(dict_task_id[peak][mass]),
+                    verify=verify_https,
+                ).text
+            )
             state.add(json_obj["status"])
     return (state)
 
 
-def _wait_for_workflow_finish(dict_task_id):
+def _wait_for_workflow_finish(dict_task_id, poll_interval=60, max_wait_seconds=None):
+    if poll_interval <= 0:
+        raise ValueError("poll_interval doit etre > 0.")
+
+    start_time = time.time()
     statues = _workflows_statues(dict_task_id)
+    print(f"Current GNPS status: {statues}")
     while statues != {'DONE'} :
-        time.sleep(60)
+        if max_wait_seconds is not None and (time.time() - start_time) >= max_wait_seconds:
+            raise TimeoutError(
+                f"Timeout atteint apres {max_wait_seconds} secondes. Dernier statut: {statues}"
+            )
+        time.sleep(poll_interval)
         statues = _workflows_statues(dict_task_id)
+        print(f"Current GNPS status: {statues}")
     print('all Jobs done')
     return statues
 
