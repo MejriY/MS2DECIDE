@@ -4,9 +4,9 @@ from rdkit import Chem, DataStructs
 from rdkit.Chem import AllChem
 from pathlib import Path
 from urllib import request
-from matchms.Spectrum import Spectrum
+from matchms import Spectrum
 from decimal import Decimal
-from matchms.similarity import ModifiedCosine
+from matchms.similarity import ModifiedCosineGreedy
 from matchms import calculate_scores
 import warnings
 
@@ -491,7 +491,7 @@ def _get_match(sp, query, tolerance, mz_power, intensity_power, shift):
     Returns:
         list: A list containing the best matching query object and its score.
     """
-    score = ModifiedCosine(tolerance=tolerance,
+    score = ModifiedCosineGreedy(tolerance=tolerance,
                            intensity_power=intensity_power)
     if (len(query) == 0):
         rsp, res = '#', 0
@@ -499,14 +499,14 @@ def _get_match(sp, query, tolerance, mz_power, intensity_power, shift):
         try:
             SCORES = calculate_scores(query, [sp], score)
             rsp, res = SCORES.scores_by_query(
-                sp, 'ModifiedCosine_score', sort=True)[0]
+                sp, 'ModifiedCosineGreedy_score', sort=True)[0]
         except:
             rsp, res = '#', 0
             for i in query:
                 match_mz = _find_matches(
                     sp.peaks.mz, i.peaks.mz, tolerance, shift)
                 if (len(match_mz) != 0):
-                    res_score = score.pair(i, sp)['score']
+                    res_score = score.pair(i, sp)[0]  # pair() returns (score, matches)
                     print(i)
                     if (res_score > res):
                         res = res_score
