@@ -6,7 +6,7 @@ from pathlib import Path
 from urllib import request
 from matchms import Spectrum
 from decimal import Decimal
-from matchms.similarity import ModifiedCosineGreedy
+from matchms.similarity import ModifiedCosineGreedy as ModifiedCosine
 from matchms import calculate_scores
 import warnings
 
