@@ -6,7 +6,12 @@ from pathlib import Path
 from urllib import request
 from matchms import Spectrum
 from decimal import Decimal
-from matchms.similarity import ModifiedCosineGreedy as ModifiedCosine
+
+try:
+    from matchms.similarity import ModifiedCosineGreedy
+except ImportError:
+    from matchms.similarity import ModifiedCosine as ModifiedCosineGreedy
+
 from matchms import calculate_scores
 import warnings
 
@@ -61,7 +66,7 @@ def _check_file_and_download(tool):
         Path: The path to the downloaded file.
     """
     isdb_path = input(
-        'SELECT DIRECTORY OF ISDB-LOTUS DATA \n IF THE MGF FILE IS NOT THERE, THE LIBRARY WILL BE DOWNLOADED. This path needs to terminate with a \ at the end \n')
+        'SELECT DIRECTORY OF ISDB-LOTUS DATA \n IF THE MGF FILE IS NOT THERE, THE LIBRARY WILL BE DOWNLOADED. This path needs to terminate with a \\ at the end \n')
     # if (isdb_path[-2:] != "\\"):
     #     isdb_path += '\\'
 
@@ -117,12 +122,12 @@ def tanimoto(inc1, inc2):
     Returns:
         float: Tanimoto similarity score.
     """
-    if (inc1 in ['#','?','*']) or (inc2 in ['#','?','*']):
+    if (inc1 in ['#', '?', '*']) or (inc2 in ['#', '?', '*']):
         return (0)
     else:
         mol1 = Chem.MolFromInchi(inc1)
         mol2 = Chem.MolFromInchi(inc2)
-        fp1 = AllChem.GetMorganFingerprintAsBitVect(mol1, 2,  nBits=2048)
+        fp1 = AllChem.GetMorganFingerprintAsBitVect(mol1, 2, nBits=2048)
         fp2 = AllChem.GetMorganFingerprintAsBitVect(mol2, 2, nBits=2048)
         s = DataStructs.TanimotoSimilarity(fp1, fp2)
         return s
@@ -279,7 +284,6 @@ def owa(weights, values):
         float: OWA score.
     """
     sorted_values = np.nan_to_num(np.array(sorted(values, reverse=True)))
-    # return(sum([weights[i]*sorted_values[i] for i in range(len(weights))]))
     return (float(Decimal(np.dot(np.array(weights), sorted_values))))
 
 
@@ -437,7 +441,7 @@ def _find_matches(spec1_mz, spec2_mz, tolerance, shift):
         shift (float): An additional value to shift the m/z values of the second spectrum.
 
     Returns:
-        list: A list of tuples, where each tuple contains the indices of matching peaks 
+        list: A list of tuples, where each tuple contains the indices of matching peaks
               from the first and second spectra.
     """
     lowest_idx = 0
@@ -476,7 +480,33 @@ def _mass_selection_by_tolerance(sp, query_mass, query, tolerance):
     return selected
 
 
-def _get_match(sp, query, tolerance, mz_power, intensity_power, shift):
+def _extract_similarity_score(pair_result):
+    """
+    Extract a numeric similarity score from matchms pair() output across versions.
+    """
+    if isinstance(pair_result, tuple):
+        return float(pair_result[0])
+
+    if isinstance(pair_result, dict):
+        if 'score' in pair_result:
+            return float(pair_result['score'])
+        if 'ModifiedCosineGreedy_score' in pair_result:
+            return float(pair_result['ModifiedCosineGreedy_score'])
+        if 'ModifiedCosine_score' in pair_result:
+            return float(pair_result['ModifiedCosine_score'])
+
+    try:
+        return float(pair_result)
+    except Exception:
+        pass
+
+    try:
+        return float(pair_result[0])
+    except Exception:
+        raise TypeError(f"Unsupported score format returned by pair(): {type(pair_result)}")
+
+
+def _get_match(sp, query, tolerance, mz_power=0.0, intensity_power=0.5, shift=0.0):
     """
     Retrieve the best match from a spectrum based on a given query and scoring method.
 
@@ -491,24 +521,30 @@ def _get_match(sp, query, tolerance, mz_power, intensity_power, shift):
     Returns:
         list: A list containing the best matching query object and its score.
     """
-    score = ModifiedCosineGreedy(tolerance=tolerance,
-                           intensity_power=intensity_power)
+    score = ModifiedCosineGreedy(
+        tolerance=tolerance,
+        intensity_power=intensity_power
+    )
+
     if (len(query) == 0):
         rsp, res = '#', 0
-    else:
+        return [rsp, res]
+
+    rsp, res = '#', 0
+
+    for i in query:
         try:
-            SCORES = calculate_scores(query, [sp], score)
-            rsp, res = SCORES.scores_by_query(
-                sp, 'ModifiedCosineGreedy_score', sort=True)[0]
-        except:
-            rsp, res = '#', 0
-            for i in query:
-                match_mz = _find_matches(
-                    sp.peaks.mz, i.peaks.mz, tolerance, shift)
-                if (len(match_mz) != 0):
-                    res_score = score.pair(i, sp)[0]  # pair() returns (score, matches)
-                    print(i)
-                    if (res_score > res):
-                        res = res_score
-                        rsp = i
+            match_mz = _find_matches(sp.peaks.mz, i.peaks.mz, tolerance, shift)
+            if (len(match_mz) == 0):
+                continue
+
+            pair_result = score.pair(i, sp)
+            res_score = _extract_similarity_score(pair_result)
+
+            if (res_score > res):
+                res = res_score
+                rsp = i
+        except Exception:
+            continue
+
     return [rsp, res]
