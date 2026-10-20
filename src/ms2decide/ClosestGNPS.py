@@ -3,7 +3,6 @@ from .MgfInstance import MgfInstance
 from .Util import path_gnps, Parametres, get_correct_inchi, _mass_selection_by_tolerance, _get_match
 from matchms.importing import load_from_mgf
 from matchms import Spectrum
-import urllib.request
 import json
 import requests
 import chardet
@@ -17,6 +16,29 @@ import socket
 import os
 
 
+def _gnps_user_path(username, remote_path):
+    """
+    Build the GNPS path of a file uploaded by FTP in the user space.
+
+    GNPS displays such files as 'f.<user>/<folder>/<file>' and its file selectors
+    store them with a trailing semicolon. The prefix can be overridden with the
+    environment variable MS2DECIDE_GNPS_PREFIX (default: 'f.').
+
+    Args:
+        username (str): GNPS user name.
+        remote_path (str): Path returned by the FTP upload (e.g. '/folder/file.mgf').
+
+    Returns:
+        str: Path usable in 'spec_on_server' / 'quantification_table'.
+    """
+    prefix = os.getenv("MS2DECIDE_GNPS_PREFIX", "f.")
+    rel = str(remote_path).replace("\\", "/").lstrip("/")
+    # Avoid a duplicated user name if the FTP root already contains it.
+    if rel.startswith(username + "/"):
+        rel = rel[len(username) + 1:]
+    return f"{prefix}{username}/{rel};"
+
+
 def _invoke_workflow(auth, base_url, parameters):
     """
     Log in to a specific URL using username and password to launch a workflow with given parameters.
@@ -28,6 +50,9 @@ def _invoke_workflow(auth, base_url, parameters):
 
     Returns:
         str: Task ID of the launched workflow.
+
+    Raises:
+        RuntimeError: if the GNPS task cannot be created.
     """
 
     username = auth.username
@@ -57,18 +82,23 @@ def _invoke_workflow(auth, base_url, parameters):
         data=payload,
         verify=verify_https,
     )
+    if r.status_code != 200:
+        raise PermissionError(
+            f"Connexion GNPS refusee (HTTP {r.status_code}).")
+
+    # No automatic retry here: a retry after a late failure could create duplicate jobs.
     r = s.post('https://' + base_url + '/ProteoSAFe/InvokeTools',
                data=parameters, verify=verify_https)
-    task_id = r.text
+    task_id = r.text.strip()
 
-    print(r.text, file=sys.stderr, flush=True)
-
-    if len(task_id) > 4 and len(task_id) < 60:
-        print("Launched Task: : " + r.text)
+    if 4 < len(task_id) < 60 and "error" not in task_id.lower():
+        print("Launched Task: : " + task_id)
         return task_id
-    else:
-        print(task_id)
-        return None
+
+    print(task_id, file=sys.stderr, flush=True)
+    raise RuntimeError(
+        "Echec de la creation de la tache GNPS (HTTP "
+        + str(r.status_code) + "). Reponse du serveur :\n" + task_id)
 
 
 def _upload_to_gnps(auth, input_file_mgf, input_file_quan, folder):
@@ -203,6 +233,18 @@ def _upload_to_gnps(auth, input_file_mgf, input_file_quan, folder):
 
         return ftp_conn
 
+    def _check_remote_files(ftp_conn, names):
+        """Verify that the uploaded files are listed in the remote folder."""
+        try:
+            listed = [n.replace("\\", "/").split("/")[-1] for n in ftp_conn.nlst()]
+        except ftplib.error_perm:
+            # An empty listing is reported as an error by some servers.
+            listed = []
+        missing = [n for n in names if n not in listed]
+        if missing:
+            raise ConnectionError(
+                f"Fichiers absents du dossier distant apres upload : {missing}")
+
     upload_strategies = [
         {
             "name": "FTPS passive (PROT P + session reuse)",
@@ -231,6 +273,7 @@ def _upload_to_gnps(auth, input_file_mgf, input_file_quan, folder):
     ]
 
     last_error = None
+
     def _safe_remote_name(name):
         # Avoid FTP path parsing issues with whitespace and control chars.
         cleaned = "".join(ch if ch.isprintable() else "_" for ch in name)
@@ -255,6 +298,8 @@ def _upload_to_gnps(auth, input_file_mgf, input_file_quan, folder):
             ftp = _upload_one_file(ftp, input_file_quan, remote_csv, strategy)
             path_csv = ftp.pwd() + "/" + remote_csv
             print("CSV uploaded:", path_csv)
+
+            _check_remote_files(ftp, [remote_mgf, remote_csv])
 
             print("Files uploaded")
             return (path_mgf, path_csv)
@@ -355,28 +400,40 @@ def _get_iterative_parameters():
     return alpha
 
 
+def _wait_after_upload():
+    """Short pause so that GNPS can index the files uploaded by FTP."""
+    delay = int(os.getenv("MS2DECIDE_GNPS_DELAY", "5"))
+    if delay > 0:
+        print(f"Waiting {delay}s for GNPS to index the uploaded files...")
+        time.sleep(delay)
+
+
 def _launch_GNPS_workflow(auth, path_file_mgf_in_gnps, path_file_quan_in_gnps, job_description, score_threshold):
     """
     Log in to GNPS using username and password, upload file to MassIVE repository, and launch feature-based molecular networking workflow.
 
     Args:
         auth (Auth): Authentication object with username, password, and email.
-        file_path (str): The local path of the .mfg file.
+        path_file_mgf_in_gnps (str): Path of the .mgf file uploaded by FTP.
+        path_file_quan_in_gnps (str): Path of the quantification table uploaded by FTP.
         job_description (str): Title of the job.
+        score_threshold: Minimum cosine score for library search.
 
     Returns:
         str: Task ID of the launched workflow.
     """
-    invokeParameters = {}
     invokeParameters = _get_networking_parameters()
     invokeParameters["SCORE_THRESHOLD"] = score_threshold
     invokeParameters["desc"] = job_description
     invokeParameters["MAX_SHIFT_MASS"] = str(0.02)
-    invokeParameters["quantification_table"] = "d./" + \
-        auth.username + path_file_quan_in_gnps
-    invokeParameters["spec_on_server"] = "d./" + \
-        auth.username + path_file_mgf_in_gnps
+    invokeParameters["quantification_table"] = _gnps_user_path(
+        auth.username, path_file_quan_in_gnps)
+    invokeParameters["spec_on_server"] = _gnps_user_path(
+        auth.username, path_file_mgf_in_gnps)
     invokeParameters["email"] = auth.mail
+
+    print("spec_on_server:", invokeParameters["spec_on_server"])
+    print("quantification_table:", invokeParameters["quantification_table"])
 
     task_id = _invoke_workflow(auth, "gnps.ucsd.edu", invokeParameters)
 
@@ -397,22 +454,23 @@ def _launch_GNPS_workflow_iterative(auth, path_file_mgf_in_gnps, path_file_quan_
         dict: A dictionary containing task IDs for different peak and mass combinations.
     """
     SCORE_THRESHOLD = input(
-        "INPUT A SCORE_THRESHOLD FOR ITERATIVE GNPS. DEFAULT 0.001")
+        "INPUT A SCORE_THRESHOLD FOR ITERATIVE GNPS. DEFAULT 0.001").strip()
+    if not SCORE_THRESHOLD:
+        SCORE_THRESHOLD = "0.001"
+    path_quan = _gnps_user_path(auth.username, path_file_quan_in_gnps)
+    path_mgf = _gnps_user_path(auth.username, path_file_mgf_in_gnps)
     D_job = {}
     for peak in [6, 5, 4]:
         d = {i: 0 for i in [0.02, 0.1, 10, 25, 50, 100, 250, 500, 0]}
         for mass_diff in [0.02, 0.1, 10, 25, 50, 100, 250, 500, 0]:
-            invokeParameters = {}
             invokeParameters = _get_networking_parameters()
             invokeParameters["SCORE_THRESHOLD"] = SCORE_THRESHOLD
             invokeParameters["MIN_MATCHED_PEAKS_SEARCH"] = str(peak)
             invokeParameters["MAX_SHIFT_MASS"] = str(mass_diff)
             invokeParameters["desc"] = job_description + \
                 '_'+str(peak)+'_'+str(mass_diff)
-            invokeParameters["quantification_table"] = "d./" + \
-                auth.username + path_file_quan_in_gnps
-            invokeParameters["spec_on_server"] = "d./" + \
-                auth.username + path_file_mgf_in_gnps
+            invokeParameters["quantification_table"] = path_quan
+            invokeParameters["spec_on_server"] = path_mgf
             invokeParameters["email"] = auth.mail
             task_id = _invoke_workflow(auth, "gnps.ucsd.edu", invokeParameters)
             d[mass_diff] = task_id
@@ -420,12 +478,17 @@ def _launch_GNPS_workflow_iterative(auth, path_file_mgf_in_gnps, path_file_quan_
     return D_job
 
 
-def _gnps_annotations_download_results(task_id):
+def _gnps_annotations_download_results(task_id, retries=20, wait=60):
     """
     Download GNPS molecular networking job results locally.
 
+    GNPS sometimes does not answer (or is down for a long time), so the download
+    is retried (default: 20 attempts, 60 s apart).
+
     Args:
         task_id (str): GNPS task ID.
+        retries (int): Number of attempts.
+        wait (int): Seconds to wait between two attempts.
 
     Returns:
         pd.DataFrame: Dataframe containing job annotations.
@@ -434,33 +497,66 @@ def _gnps_annotations_download_results(task_id):
     # Base link to download GNPS job annotations
     if (task_id[:3].lower() == 'id='):
         task_id = task_id[3:]
-    gnps_download_link = 'https://gnps.ucsd.edu/ProteoSAFe/result_json.jsp?task={}&view=view_all_annotations_DB'
-    # Launch the download
-    with urllib.request.urlopen(gnps_download_link.format(task_id)) as url:
-        raw_data = url.read()  # Read the binary data
-        # Detect encoding
-        detected_encoding = chardet.detect(raw_data)
-        decoded_data = raw_data.decode(
-            detected_encoding['encoding'], errors='replace')
-    # Parse the string as JSON
-    try:
-        # Convert the decoded string to a Python dictionary
-        data = json.loads(decoded_data)
-        print("JSON Loaded Successfully")
-        df_annotations = pd.DataFrame.from_dict(data['blockData'])
-        print('==================')
-        print(' FBMN job detected with ' +
-              str(df_annotations.shape[0]-1) + ' spectral library annotations in the job:' + task_id)
-        print('==================')
-        df_annotations[['#Scan#', 'MQScore']] = df_annotations[[
-            '#Scan#', 'MQScore']].apply(pd.to_numeric)
-        return (df_annotations)
-    except json.JSONDecodeError as e:
-        print(f"JSON Decode Error: {e}")
-        raise Exception('CAN NOT GET THE DATA FROM THE JOB: ' + task_id)
+    link = ('https://gnps.ucsd.edu/ProteoSAFe/result_json.jsp'
+            '?task={}&view=view_all_annotations_DB').format(task_id)
+    verify_https = str(os.getenv("MS2DECIDE_HTTPS_VERIFY_TLS", "0")).lower() in (
+        "1", "true", "yes"
+    )
+    if not verify_https:
+        try:
+            from urllib3.exceptions import InsecureRequestWarning
+            requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
+        except Exception:
+            pass
+    headers = {"User-Agent": "Mozilla/5.0 (MS2DECIDE)"}
+
+    data = None
+    last_error = None
+    for attempt in range(1, retries + 1):
+        try:
+            r = requests.get(link, headers=headers,
+                             verify=verify_https, timeout=120)
+            r.raise_for_status()
+            raw_data = r.content
+            detected_encoding = chardet.detect(raw_data)
+            decoded_data = raw_data.decode(
+                detected_encoding['encoding'] or 'utf-8', errors='replace')
+            data = json.loads(decoded_data)
+            print("JSON Loaded Successfully")
+            break
+        except (requests.RequestException, ValueError) as exc:
+            last_error = exc
+            print(
+                f"GNPS results unavailable (attempt {attempt}/{retries}): {exc}")
+            if attempt < retries:
+                time.sleep(wait)
+
+    if data is None:
+        raise RuntimeError(
+            f"CAN NOT GET THE DATA FROM THE JOB: {task_id}. Last error: {last_error}\n"
+            f"Check in a browser: {link}")
+
+    df_annotations = pd.DataFrame.from_dict(data.get('blockData', []))
+    if df_annotations.empty:
+        print('No spectral library annotation found in the job:' + task_id)
+        return pd.DataFrame({'#Scan#': pd.Series(dtype='int64'),
+                             'MQScore': pd.Series(dtype='float64')})
+    print('==================')
+    print(' FBMN job detected with ' +
+          str(df_annotations.shape[0]-1) + ' spectral library annotations in the job:' + task_id)
+    print('==================')
+    df_annotations[['#Scan#', 'MQScore']] = df_annotations[[
+        '#Scan#', 'MQScore']].apply(pd.to_numeric)
+    return (df_annotations)
 
 
-def _workflows_statues(dict_task_id):
+def _workflows_statues(dict_task_id, retries=5, wait=30):
+    """
+    Return the set of GNPS statuses of all given tasks.
+
+    GNPS sometimes answers with an empty or non-JSON page, so each request is retried.
+    Raises RuntimeError if a status cannot be read after all attempts.
+    """
     state = set()
     url = 'https://gnps.ucsd.edu/ProteoSAFe/status_json.jsp?task={}'
     verify_https = str(os.getenv("MS2DECIDE_HTTPS_VERIFY_TLS", "0")).lower() in (
@@ -475,33 +571,72 @@ def _workflows_statues(dict_task_id):
 
     for peak in dict_task_id:
         for mass in dict_task_id[peak]:
-            json_obj = json.loads(
-                requests.get(
-                    url.format(dict_task_id[peak][mass]),
-                    verify=verify_https,
-                ).text
-            )
-            state.add(json_obj["status"])
+            task = dict_task_id[peak][mass]
+            last_error = None
+            for attempt in range(1, retries + 1):
+                try:
+                    r = requests.get(
+                        url.format(task), verify=verify_https, timeout=60)
+                    r.raise_for_status()
+                    state.add(json.loads(r.text)["status"])
+                    break
+                except (requests.RequestException, ValueError, KeyError) as exc:
+                    last_error = exc
+                    print(
+                        f"GNPS status unavailable (attempt {attempt}/{retries}): {exc}")
+                    if attempt < retries:
+                        time.sleep(wait)
+            else:
+                raise RuntimeError(
+                    f"Impossible de lire le statut du job {task}: {last_error}")
     return (state)
 
 
-def _wait_for_workflow_finish(dict_task_id, poll_interval=60, max_wait_seconds=None):
+def _wait_for_workflow_finish(dict_task_id, poll_interval=60, max_wait_seconds=None,
+                              max_outage_seconds=None):
+    """
+    Wait until all the given GNPS jobs are DONE.
+
+    A GNPS outage does not stop the wait: the status is polled again every
+    poll_interval seconds, and the function only gives up after max_outage_seconds
+    of continuous unavailability (default 24 h, or env MS2DECIDE_GNPS_MAX_OUTAGE).
+    """
     if poll_interval <= 0:
         raise ValueError("poll_interval doit etre > 0.")
+    if max_outage_seconds is None:
+        max_outage_seconds = int(os.getenv("MS2DECIDE_GNPS_MAX_OUTAGE", str(24 * 3600)))
 
     start_time = time.time()
-    statues = _workflows_statues(dict_task_id)
-    print(f"Current GNPS status: {statues}")
-    while statues != {'DONE'} :
+    outage_start = None
+    last_printed = None
+    while True:
+        try:
+            statues = _workflows_statues(dict_task_id, retries=1, wait=0)
+            outage_start = None
+        except RuntimeError:
+            if outage_start is None:
+                outage_start = time.time()
+            down = time.time() - outage_start
+            if down >= max_outage_seconds:
+                raise
+            print(f"GNPS unreachable for {int(down // 60)} min, still trying...")
+            time.sleep(poll_interval)
+            continue
+
+        if statues != last_printed:
+            print(f"Current GNPS status: {statues}")
+            last_printed = statues
+        if statues == {'DONE'}:
+            print('all Jobs done')
+            return statues
+        if statues & {'FAILED', 'SUSPENDED'}:
+            raise RuntimeError(
+                f"Un job GNPS a echoue ou a ete suspendu. Statut: {statues}")
         if max_wait_seconds is not None and (time.time() - start_time) >= max_wait_seconds:
             raise TimeoutError(
                 f"Timeout atteint apres {max_wait_seconds} secondes. Dernier statut: {statues}"
             )
         time.sleep(poll_interval)
-        statues = _workflows_statues(dict_task_id)
-        print(f"Current GNPS status: {statues}")
-    print('all Jobs done')
-    return statues
 
 
 def closest_gnps(auth, input_file_mgf, input_file_quan, folder, score_threshold):
@@ -519,10 +654,11 @@ def closest_gnps(auth, input_file_mgf, input_file_quan, folder, score_threshold)
     dict_data = mgf_instance.data
     path_file_mgf_in_gnps, path_file_quan_in_gnps = _upload_to_gnps(
         auth, input_file_mgf, input_file_quan, folder)
-    job_description = input_file_mgf.stem
+    _wait_after_upload()
+    job_description = Path(input_file_mgf).stem
     task_id = _launch_GNPS_workflow(
         auth, path_file_mgf_in_gnps, path_file_quan_in_gnps, job_description, score_threshold)
-    _wait_for_workflow_finish({0:{0:task_id}})
+    _wait_for_workflow_finish({0: {0: task_id}})
     df_anno = _gnps_annotations_download_results(task_id)
     df_anno = df_anno.rename(columns=str.lower)
     dic_anno = df_anno.set_index("#scan#").to_dict('index')
@@ -592,7 +728,7 @@ def closest_gnps_by_id(job_id, mgf_path):
     Returns a dictionary of MatchedSpectra objects for the closest matches in GNPS.
 
     Args:
-        auth (Auth): Authentication object with username, password, and email.
+        job_id (str): GNPS task ID.
         mgf_path (str): The local path of the .mfg file.
 
     Returns:
@@ -620,48 +756,21 @@ def closest_gnps_iterative(auth, input_file_mgf, input_file_quan):
 
     Args:
         auth (Auth): Authentication object with username, password, and email.
-        mgf_path (str): The local path of the .mfg file.
+        input_file_mgf (str): The local path of the .mfg file.
+        input_file_quan (str): The local path of the quantification table.
 
     Returns:
         dict: Dictionary {id: MatchedSpectra}.
     """
-    mgf_instance = MgfInstance(Path(input_file_mgf))
-    dict_data = mgf_instance.data
     job_description = Path(input_file_mgf).stem
     path_file_mgf_in_gnps, path_file_quan_in_gnps = _upload_to_gnps(
         auth, input_file_mgf, input_file_quan, job_description)
+    _wait_after_upload()
     dict_task_id = _launch_GNPS_workflow_iterative(
         auth, path_file_mgf_in_gnps, path_file_quan_in_gnps, job_description)
     _wait_for_workflow_finish(dict_task_id)
 
-    res = {}
-    for peak in dict_task_id:
-        s = {i: 0 for i in dict_task_id[peak]}
-        for mass in dict_task_id[peak]:
-            job = dict_task_id[peak][mass]
-            s[mass] = closest_gnps_by_id(job, input_file_mgf)
-        res[peak] = s
-
-    alpha = _get_iterative_parameters
-    ordre = [0.02, 0.1, 10, 25, 50, 100, 250, 500, 0]
-    matched_spectra_dict = {}
-    for ID in dict_data:
-        for peak in [6, 5, 4]:
-            for mass in ordre:
-                if (ID not in matched_spectra_dict):
-                    # ['#','*','?']):
-                    if (res[peak][mass][ID].inchi not in ['#', '?']):
-                        sp = res[peak][mass][ID].spectrum
-                        inc = res[peak][mass][ID].inchi
-                        score = res[peak][mass][ID].score
-                        matched_spectra_dict[ID] = MatchedSpectra(
-                            sp, inc, score*alpha[peak][mass])
-        if (ID not in matched_spectra_dict):
-            sp = res[4][0][ID].spectrum
-            inc = res[4][0][ID].inchi
-            score = res[4][0][ID].score*alpha[4][0]
-            matched_spectra_dict[ID] = MatchedSpectra(sp, inc, score)
-    return (matched_spectra_dict)
+    return closest_gnps_ietrative_by_id(dict_task_id, input_file_mgf)
 
 
 def closest_gnps_ietrative_by_id(dict_task_id, input_file_mgf):
