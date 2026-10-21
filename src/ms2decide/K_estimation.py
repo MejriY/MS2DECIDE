@@ -1,6 +1,7 @@
 from .MgfInstance import MgfInstance
 from .AuthMail import AuthMail
 from .ClosestGNPS import _launch_GNPS_workflow_iterative, _upload_to_gnps, closest_gnps_ietrative_by_id, _wait_for_workflow_finish, _launch_GNPS_workflow, closest_gnps_by_id
+from .Gnps2Annotation import closest_gnps2_from_file
 from .IsdbAnnotation import get_cfm_annotation
 from .SiriusAnnotation import SiriusAnnotation
 from .gnps_empty_repport import gnps_empty_repport
@@ -38,6 +39,15 @@ def _ask_choice(prompt, choices):
         if raw in choices:
             return raw
         print(f"Choix possibles : {', '.join(choices)}")
+
+
+def _ask_existing_file(prompt):
+    """Ask until the answer is the path of an existing file."""
+    while True:
+        path = _clean_path(input(prompt))
+        if Path(path).is_file():
+            return path
+        print(f"Fichier introuvable : {path}")
 
 
 def _isdb_cache_path(mgf_path):
@@ -101,8 +111,11 @@ def K_estimation():
     annotation data from multiple sources and compiles the results into a dataframe filtered by specific
     precursor mass criteria.
 
-    An existing GNPS FBMN job can be reused (strict mode) by providing its task ID,
-    which skips the upload and the launch of a new GNPS job.
+    The GNPS annotations can come from:
+      - a new FBMN job launched on classic GNPS by this function (strict or iterative),
+      - an existing classic GNPS FBMN job (task ID, strict mode only),
+      - an FBMN job run manually on GNPS2: the library-search table downloaded from
+        the GNPS2 task (<task id>-merged_results_with_gnps.tsv) is given to the function.
 
     The ISDB results are saved next to the MGF file (<mgf name>_isdb_results.pkl) and can be
     reused on the next run if the MGF file and the tolerance are unchanged.
@@ -110,58 +123,74 @@ def K_estimation():
     Returns:
         DataFrame: A dataframe containing the filtered results based on K estimation.
     """
-    username = input('GNPS username: ').strip()
-    password = getpass.getpass("GNPS password: ")
-    mail = input('GNPS mail: ').strip()
-    auth = AuthMail(username, password, mail)
+    gnps_source = _ask_choice(
+        'GNPS ANNOTATION SOURCE: classic (job launched or reused from classic GNPS) '
+        'or gnps2 (library results file of a job run manually on GNPS2): ',
+        ('classic', 'gnps2'))
 
-    quan_path = _clean_path(input(
-        'SELECT THE PATH FOR YOUR QUANTITATIVE FILE. This path needs to terminate with a *.csv at the end \n :'))
+    auth = None
+    if gnps_source == 'classic':
+        username = input('GNPS username: ').strip()
+        password = getpass.getpass("GNPS password: ")
+        mail = input('GNPS mail: ').strip()
+        auth = AuthMail(username, password, mail)
+
+    quan_path = None
+    if gnps_source == 'classic':
+        quan_path = _clean_path(input(
+            'SELECT THE PATH FOR YOUR QUANTITATIVE FILE. This path needs to terminate with a *.csv at the end \n :'))
     mgf_path = _clean_path(input(
         'SELECT THE PATH FOR YOU MGF FILE. This path needs to terminate with a *.mgf at the end \n :'))
     mgf = MgfInstance(Path(mgf_path))
 
-    existing_task = input(
-        'EXISTING GNPS FBMN TASK ID TO REUSE (leave empty to launch a new GNPS job) \n :').strip()
-    if existing_task.lower().startswith('task='):
-        existing_task = existing_task[5:]
-
     dict_task_id = None
     task_id = None
-    if existing_task:
-        reaserach_type = 'strict'
-        task_id = existing_task
-        print("Reusing GNPS task:", task_id)
+    gnps2_file = None
+    if gnps_source == 'gnps2':
+        reaserach_type = 'gnps2'
+        gnps2_file = _ask_existing_file(
+            'SELECT THE PATH FOR THE GNPS2 LIBRARY RESULTS FILE (<task id>-merged_results_with_gnps.tsv). \n'
+            ' The GNPS2 job must have been run with the same MGF file. \n :')
     else:
-        job_description = input('INPUT A TITLE FOR YOUR FBMN GNPS JOB \n :').strip()
-        # Safe remote folder name (no spaces / special characters).
-        remote_folder = re.sub(r'[^A-Za-z0-9_.-]', '_', job_description) or 'ms2decide_job'
-        path_file_mgf_in_gnps, path_file_quan_in_gnps = _upload_to_gnps(
-            auth, Path(mgf_path), Path(quan_path), remote_folder)
-        reaserach_type = _ask_choice(
-            "PLEASE SPECIFY THE TYPE OF GNPS LIBRARY SEARCH THAT YOU WOULD LIKE TO APPLY. \n"
-            " strict: for mass difference of 0.02 Da and six matched peaks with very low cosine threshold. \n"
-            " iterative: for iterative weighted analog search (can take up to three hours). \n",
-            ('strict', 'iterative'))
-        if reaserach_type == 'iterative':
-            dict_task_id = _launch_GNPS_workflow_iterative(
-                auth, path_file_mgf_in_gnps, path_file_quan_in_gnps, job_description)
-            print("GNPS iterative task IDs:", dict_task_id)
-            save_jobs = _ask_choice(
-                "DO YOU WANT TO SAVE ITERATIVE GNPS JOBS? (yes or no) ", ('yes', 'no'))
-            if save_jobs == 'yes':
-                save_path_job = _clean_path(input(
-                    'SELECT THE SAVE PATH FOR THE .txt FILE OF ITERATIVE GNPS JOBS. \n This path needs to terminate with a *.txt at the end \n :'))
-                with open(save_path_job, "w") as f:
-                    f.write(str(dict_task_id))
+        existing_task = input(
+            'EXISTING GNPS FBMN TASK ID TO REUSE (leave empty to launch a new GNPS job) \n :').strip()
+        if existing_task.lower().startswith('task='):
+            existing_task = existing_task[5:]
+
+        if existing_task:
+            reaserach_type = 'strict'
+            task_id = existing_task
+            print("Reusing GNPS task:", task_id)
         else:
-            score_threshold = _ask_float(
-                'Please can you provide a minimum cosine score that MS/MS spectra should get in spectral matching (0-1, default 0.1) ',
-                0.1, 0.0, 1.0)
-            task_id = _launch_GNPS_workflow(
-                auth, path_file_mgf_in_gnps, path_file_quan_in_gnps, job_description, str(score_threshold))
-            # Keep the task ID visible so the run can be resumed if a later step fails.
-            print("GNPS task_id (keep it to resume):", task_id)
+            job_description = input('INPUT A TITLE FOR YOUR FBMN GNPS JOB \n :').strip()
+            # Safe remote folder name (no spaces / special characters).
+            remote_folder = re.sub(r'[^A-Za-z0-9_.-]', '_', job_description) or 'ms2decide_job'
+            path_file_mgf_in_gnps, path_file_quan_in_gnps = _upload_to_gnps(
+                auth, Path(mgf_path), Path(quan_path), remote_folder)
+            reaserach_type = _ask_choice(
+                "PLEASE SPECIFY THE TYPE OF GNPS LIBRARY SEARCH THAT YOU WOULD LIKE TO APPLY. \n"
+                " strict: for mass difference of 0.02 Da and six matched peaks with very low cosine threshold. \n"
+                " iterative: for iterative weighted analog search (can take up to three hours). \n",
+                ('strict', 'iterative'))
+            if reaserach_type == 'iterative':
+                dict_task_id = _launch_GNPS_workflow_iterative(
+                    auth, path_file_mgf_in_gnps, path_file_quan_in_gnps, job_description)
+                print("GNPS iterative task IDs:", dict_task_id)
+                save_jobs = _ask_choice(
+                    "DO YOU WANT TO SAVE ITERATIVE GNPS JOBS? (yes or no) ", ('yes', 'no'))
+                if save_jobs == 'yes':
+                    save_path_job = _clean_path(input(
+                        'SELECT THE SAVE PATH FOR THE .txt FILE OF ITERATIVE GNPS JOBS. \n This path needs to terminate with a *.txt at the end \n :'))
+                    with open(save_path_job, "w") as f:
+                        f.write(str(dict_task_id))
+            else:
+                score_threshold = _ask_float(
+                    'Please can you provide a minimum cosine score that MS/MS spectra should get in spectral matching (0-1, default 0.1) ',
+                    0.1, 0.0, 1.0)
+                task_id = _launch_GNPS_workflow(
+                    auth, path_file_mgf_in_gnps, path_file_quan_in_gnps, job_description, str(score_threshold))
+                # Keep the task ID visible so the run can be resumed if a later step fails.
+                print("GNPS task_id (keep it to resume):", task_id)
 
     ISDBtol = _ask_float(
         'SELECT MASS TOLERANCE FOR ISDB-LOTUS ANNOTATION (LESS THAN 0.5, DEFAULT 0.02) ',
@@ -191,7 +220,9 @@ def K_estimation():
     sirius_res = SiriusAnnotation(sirius_path, mgf, indexScore)
 
     # _wait_for_workflow_finish blocks until all jobs are DONE and raises on FAILED/SUSPENDED.
-    if reaserach_type == 'iterative':
+    if reaserach_type == 'gnps2':
+        gnps_res = closest_gnps2_from_file(gnps2_file, mgf_path)
+    elif reaserach_type == 'iterative':
         _wait_for_workflow_finish(dict_task_id)
         gnps_res = closest_gnps_ietrative_by_id(dict_task_id, mgf_path)
     else:
