@@ -88,6 +88,8 @@ image::https://github.com/MejriY/Decide_test/raw/master/image/who%20it%20work.pn
 
 - Processes user-provided input files such as quantitative data and MGF files.
 
+- Gets the GNPS annotations from an FBMN job launched on classic GNPS by MS2DECIDE, from an existing classic GNPS job (task ID), or from the results table of a job run manually on GNPS2.
+
 - Generates a filtered dataframe based on the estimated \( K \)-values.
 
 - Exports the results into a `.tsv` file for further analysis.
@@ -113,8 +115,17 @@ from ms2decide.K_estimation import K_estimation
 ----
 K_estimation()
 ----
+**[NEW] Choose the source of the GNPS annotations**
+
+The first prompt asks where the GNPS annotations come from:
+
+     GNPS ANNOTATION SOURCE: classic (job launched or reused from classic GNPS) or gnps2 (library results file of a job run manually on GNPS2):
+
+- `classic`: MS2DECIDE launches the FBMN job on classic GNPS (https://gnps.ucsd.edu) from your account, or reuses one of your existing jobs. This is the default workflow described below.
+- `gnps2`: you provide the library-search results of an FBMN job that you ran manually on GNPS2 (see "Optional: use the results of an FBMN job run manually on GNPS2").
+
 **Input credentials**
-   - The function will prompt you to provide your GNPS username, password, and email. This is necessary for authenticating on the GNPS platform.
+   - With the `classic` source, the function will prompt you to provide your GNPS username, password, and email. This is necessary for authenticating on the GNPS platform. **With the `gnps2` source, no GNPS credentials are requested.
 
 **Provide Input Files**
 
@@ -123,11 +134,13 @@ K_estimation()
 - Ensure that you have your Sirius identification file (annotation file) related to your data.
 - Ensure internet connectivity for accessing GNPS and related services.
 - The save path for the `.tsv` file must have a valid `.tsv` extension and specify the desired file name (e.g., `\path\to\output_file.tsv`).
+- File paths can be pasted with or without surrounding quotes (e.g., copied from Windows Explorer); spaces and quotes around the path are removed automatically.
+- Prompts with a limited set of answers (GNPS source, search type, index score, yes/no) are validated: the question is asked again until a valid answer is given. Yes/no answers are not case-sensitive.
 
 By following these steps, you can effectively use the `K_estimation` function to process and analyze your compound data.
 Specify the paths to the following required files:
     
-- **Quantitative table file**: a `.csv` file containing the quantitative data for your analysis. Ensure the file format is correct to avoid errors.
+- **Quantitative table file**: a `.csv` file containing the quantitative data for your analysis (requested with the `classic` source only). Ensure the file format is correct to avoid errors.
    
 - **MGF file**: a file containing tandem mass spectrometry data in MGF format.
     
@@ -141,27 +154,71 @@ Specify the paths to the following required files:
      SELECT THE PATH FOR YOUR MGF FILE.  This path needs to terminate with a *.mgf at the end 
      : \path\to\mgf_file.mgf
 
+**[NEW] Optional: reuse an existing classic GNPS FBMN job**
 
-**Setup GNPS Workflow**
+At the following prompt you can provide the task ID of an FBMN job that has already been run on your classic GNPS account (with or without the `task=` prefix):
+
+     EXISTING GNPS FBMN TASK ID TO REUSE (leave empty to launch a new GNPS job)
+
+- If a task ID is given, no files are uploaded and no new GNPS job is launched. The workflow continues with the ISDB-LOTUS and Sirius annotations and retrieves the library annotations of this job.
+- This option is only available for the `strict` search type. Make sure that the job was run on the same MGF and quantitative files.
+- The task ID of each job launched by the function is displayed on screen. Keep it: if a later step fails, you can restart `K_estimation()` and reuse the job instead of launching a new one.
+
+**Setup GNPS Workflow (classic GNPS)**
 
    - **FBMN Title:** Provide a unique and descriptive title for your FBMN job. 
 
-**Notes**: A folder with this title will be created to upload the quantitative data and MGF files. Ensure the title you choose does not match the name of an existing folder.
+**Notes**: A folder is created on your GNPS account to upload the quantitative data and MGF files. Its name is derived from the title: characters other than letters, digits, `_`, `.` and `-` are replaced by `_` (e.g., `Encens neg 4/5` becomes `Encens_neg_4_5`). The title itself is kept as the description of the GNPS job. If a folder with the same name already exists, files with the same names in this folder are overwritten, so choose a title that does not match a previous analysis.
   
-- Choose the type of GNPS library search:
-           - `strict`: Uses a typical mass difference tolerance of 0.02 Da and threshold value of 0.001. For more precise information, we recommend visiting the [GNPS Documentation on Library Search](https://ccms-ucsd.github.io/GNPSDocumentation/librarysearch/).
+- Choose the type of GNPS library search (`strict` or `iterative`):
+           - `strict`: Uses a typical mass difference tolerance of 0.02 Da, six matched peaks, and threshold value of 0.001. You choose the minimum cosine score at the prompt (see below). For more precise information, we recommend visiting the [GNPS Documentation on Library Search](https://ccms-ucsd.github.io/GNPSDocumentation/librarysearch/).
 
            - `iterative`: for iterative weighted analog search (can take up to three hours).
 
-**Notes**: Since, these workflows use a library score threshold of `0.001` some failures can occur with the FBMN GNPS workflow. We recommend to increase the threshold value (for e.g., 0.1). You can specify this value at the following prompt: 
+**Notes**: Library score thresholds that are too low (for instance `0.001`) can cause failures with the FBMN GNPS workflow. In the `strict` mode you are asked for the minimum cosine score (between 0 and 1; default `0.1`, used if you press Enter):
 
 "Please can you provide a minimum cosine score that MS/MS spectra should get in spectral matching"
 
+In the `iterative` mode the threshold is asked at the launch of the jobs (default `0.001` if left empty); we recommend increasing it (e.g., 0.1) in case of failures.
+
 For your information, the iterative workflow launches 27 FBMN jobs from your GNPS account. In the case of `strict`, only one job will be launched.
 
+After the upload, the function checks that both files are present in the remote folder, waits a few seconds so that GNPS can index them and displays the GNPS paths used by the job (for example `f.<username>/<folder>/<file>;`).
 
 image::https://github.com/MejriY/MS2DECIDE_pic/raw/main/image/gnps_iterative.png[]
 
+**[NEW] Waiting for GNPS jobs**
+
+- The function checks the status of the GNPS jobs every minute and displays it when it changes. The workflow continues once all jobs are `DONE`, and stops immediately if a job is `FAILED` or `SUSPENDED`.
+- The GNPS server may occasionally not answer (errors 500, timeouts, empty answers). Requests are retried automatically: the status check keeps polling during a GNPS outage and only stops after 24 hours without any answer, and the download of the annotations is retried up to 20 times (60 s apart).
+- If the function is stopped anyway, restart it and give the GNPS task ID of the job (see "reuse an existing classic GNPS FBMN job").
+
+**[NEW] Optional: use the results of an FBMN job run manually on GNPS2**
+If you prefer (or need) to run the Feature-Based Molecular Networking job yourself on [GNPS2](https://gnps2.org) instead of letting MS2DECIDE launch it on classic GNPS, you can give the library-search results of the GNPS2 job to `K_estimation()`.
+
+At the first prompt, choose `gnps2`:
+
+     GNPS ANNOTATION SOURCE: classic (job launched or reused from classic GNPS) or gnps2 (library results file of a job run manually on GNPS2):
+     : gnps2
+
+Steps:
+
+1. Run the FBMN workflow on GNPS2 with the **same MGF file** as the one you will give to MS2DECIDE (the feature IDs of the MGF, `SCANS`, must match the feature IDs of the quantification table). To obtain annotations comparable to the `strict` mode of MS2DECIDE, set the precursor and fragment ion mass tolerances to `0.02` Da, the minimum number of matched peaks to `6`.
+2. When the GNPS2 task is `DONE`, download the library-search results table of the task: the file is named `<task id>-merged_results_with_gnps.tsv`.
+3. Start `K_estimation()`, choose `gnps2` and provide the path to this file when requested:
+
+     SELECT THE PATH FOR THE GNPS2 LIBRARY RESULTS FILE (<task id>-merged_results_with_gnps.tsv).
+     : \path\to\<task id>-merged_results_with_gnps.tsv
+
+**Notes**
+
+- With this option, no GNPS credentials and no quantitative table are requested, and no file is uploaded: GNPS is not contacted. The MGF file, the ISDB-LOTUS annotation and the Sirius annotation are requested as usual.
+- The table must contain at least the columns `#Scan#` (feature ID) and `MQScore` (cosine score). The columns `INCHI` and `Smiles` are used to get the structure of the match; when the InChI is missing (empty or `N/A`), the SMILES is used.
+- If a feature has several annotations in the file, the one with the best cosine score is kept.
+- Features without any annotation in the table are treated as having no GNPS match, as with classic GNPS.
+- MS2DECIDE prints the number of annotations read and how many of them match the spectra of the MGF file. A warning is displayed if some annotated features are not in the MGF file (the GNPS2 job was probably run with a different file), and an error is raised if none matches.
+- Only the `strict`-like search is supported with GNPS2. The `iterative` weighted analog search (27 jobs) is only available with classic GNPS.
+- GNPS2 is freely available only for non-profit and academic researchers; industry or commercial users need a license to use it. Check the conditions of use on the [GNPS2 website](https://gnps2.org) before choosing this option.
 
 **ISDB-LOTUS annotation**
 
@@ -169,9 +226,17 @@ The ISDB-LOTUS annotation is performed using the function `isdb_res = get_cfm_an
     
 - **Ionization mode**: Specify the ionization mode for annotation (`POS` for positive, `NEG` for negative).
     
-- **Mass tolerance**: Provide a mass tolerance value less than `0.5` (default: `0.02`). **Note**: This value is comprised between 0 and 0.5.
+- **Mass tolerance**: Provide a mass tolerance value less than `0.5` (default: `0.02`, used if you press Enter). **Note**: This value is comprised between 0 and 0.5**; the question is asked again if the value is outside this range.
    
 **Notes**: This function calculates annotations by matching mass spectrometry data against ISDB-LOTUS spectral data accessible [here](https://zenodo.org/records/8287341) using spectral_lib_matcher, based on the MatchMS library
+
+**[NEW] Saving and reusing the ISDB-LOTUS results**
+
+- The ISDB-LOTUS results are saved next to your MGF file, in a file named `<mgf name>_isdb_results.pkl`. The annotation can take a while, so this avoids repeating it if the workflow stops later (e.g., GNPS unavailable).
+- At the next run, if this file exists, you are asked: `SAVED ISDB RESULTS FOUND (...). REUSE THEM? (yes or no)`. The question is only asked if the MGF file (name, size, modification date) and the ISDB-LOTUS mass tolerance are unchanged. Otherwise the annotation is recomputed and the file is overwritten.
+- If the results cannot be saved, a warning is displayed and the workflow continues.
+- **Notes**: The `.pkl` file is a Python pickle. Only load files that you generated yourself, and do not commit them to your repository (add `*_isdb_results.pkl` to your `.gitignore`).
+
 
 **Sirius annotation**
 
@@ -182,7 +247,7 @@ The ISDB-LOTUS annotation is performed using the function `isdb_res = get_cfm_an
      #This path needs to terminate with structure_identifications.tsv at the end.
 
 
-Select the confidence score type: 
+Select the confidence score type (`exact` or `approximate`): 
 
      - `exact`
 
@@ -209,6 +274,28 @@ Select the confidence score type:
 - If requested (`yes`), the function generates a report of empty annotations and saves it as `empty.tsv`. This could help to complete missing InChIs or SMILES for existing MS/MS spectra on the GNPS.
 
 ---
+### **[NEW] Optional settings (environment variables)**
+
+The following environment variables can be defined before starting Python (e.g., `set MS2DECIDE_GNPS_DELAY=30` in a Windows Anaconda prompt). They are all optional.
+
+[cols="2,1,4",options="header"]
+|===
+| Variable | Default | Role
+| `MS2DECIDE_GNPS_DELAY` | `5` | Seconds to wait after the upload before launching the GNPS job (`0` to disable).
+| `MS2DECIDE_GNPS_MAX_OUTAGE` | `86400` | Seconds of continuous GNPS unavailability after which the wait for the jobs is abandoned.
+| `MS2DECIDE_GNPS_PREFIX` | `f.` | Prefix of the GNPS path of the uploaded files (`f.<username>/<folder>/<file>;`). Change only if GNPS changes its file naming.
+| `MS2DECIDE_HTTPS_VERIFY_TLS` | `0` | Set to `1` to verify the TLS certificate of the GNPS web requests.
+| `MS2DECIDE_FTPS_VERIFY_TLS` | `0` | Set to `1` to verify the TLS certificate of the GNPS FTPS server.
+| `MS2DECIDE_FTPS_DEBUG` | `0` | Set to `1` to display the FTPS exchange (for troubleshooting uploads).
+|===
+
+### **[NEW] Troubleshooting**
+
+- **`Could not find file` when the GNPS job is created**: check that the files are visible in your GNPS account under `<folder>/` and that the GNPS paths displayed by the function have the form `f.<username>/<folder>/<file>;`.
+- **`Echec de la creation de la tache GNPS`**: the answer of the GNPS server is displayed in the message. Try launching the same job manually on the GNPS website to check that the server is available.
+- **GNPS jobs keep failing**: increase the minimum cosine score (e.g., `0.1`), check that the MGF contains MS/MS spectra with feature IDs matching the quantitative table, and retry later if the GNPS server is unavailable. You can also run the job manually on GNPS2 and use the `gnps2` source.
+- **GNPS does not answer**: wait and restart `K_estimation()` with the GNPS task ID of the job, and reuse the saved ISDB-LOTUS results.
+- **GNPS2 results file rejected**: the message lists the columns found; the file must contain at least `#Scan#` and `MQScore`, and the GNPS2 job must have been run with the same MGF file.
 
 ### **Return Value**
 The function returns a (`tsv file`)containing the **processed** and **ranked** results.
